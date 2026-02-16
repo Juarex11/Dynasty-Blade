@@ -1,13 +1,11 @@
 # Dynasty Blade 💈✨
 
 Proyecto **Dynasty Blade** desarrollado con **Laravel + Blade + Tailwind CSS**.  
-Sistema base con autenticación (login) y estructura inicial para dashboard.
+Sistema base con autenticación (Login) y estructura inicial para Dashboard.
 
 ---
 
 ## 📌 Requisitos del sistema
-
-Asegúrate de tener instaladas estas versiones (o superiores compatibles):
 
 ### 🔹 Backend
 - **PHP** >= 8.1
@@ -16,9 +14,25 @@ Asegúrate de tener instaladas estas versiones (o superiores compatibles):
 - **MySQL** >= 8.0
 
 ### 🔹 Frontend
-- **Node.js** >= 18.x (recomendado LTS)
+- **Node.js** >= 18.x (LTS recomendado)
 - **NPM** >= 9.x
 - **Vite** (incluido en Laravel)
+- **Tailwind CSS** **v3.x** ✅
+
+> ⚠️ Este proyecto **NO usa Tailwind v4**
+
+---
+
+## 🧩 Versiones usadas (IMPORTANTE)
+
+| Tecnología      | Versión |
+|-----------------|---------|
+| Laravel         | 10.x    |
+| PHP             | 8.1+    |
+| Tailwind CSS    | 3.x     |
+| Vite            | 5.x     |
+| Node.js         | 18+     |
+| NPM             | 9+     |
 
 ---
 
