@@ -59,19 +59,55 @@ lg:static lg:translate-x-0 lg:w-auto">
                 <!-- Navigation -->
                 <nav class="flex-1 px-4 py-6 space-y-1 overflow-y-auto">
                     
-                    <a href="{{ route('dashboard') }}" class="group flex items-center space-x-3 px-4 py-3 rounded-xl bg-gradient-to-r from-fuchsia-500 to-pink-600 text-white shadow-lg shadow-fuchsia-500/30">
-                        <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
-                        </svg>
-                        <span class="nav-text font-medium">Dashboard</span>
-                    </a>
+   <a href="{{ route('dashboard') }}" class="group flex items-center space-x-3 px-4 py-3 rounded-xl
+    {{ Request::is('dashboard') ? 'bg-gradient-to-r from-fuchsia-500 to-pink-600 text-white shadow-lg shadow-fuchsia-500/30' : 'text-gray-600 hover:bg-fuchsia-50 hover:text-fuchsia-700' }}">
+    <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+    </svg>
+    <span class="nav-text font-medium">Dashboard</span>
+</a>
 
-                    <a href="#" class="group flex items-center space-x-3 px-4 py-3 rounded-xl text-gray-600 hover:bg-fuchsia-50 hover:text-fuchsia-700 transition-all duration-200">
-                        <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
-                        </svg>
-                        <span class="nav-text font-medium">Citas</span>
-                    </a>
+
+<a href="{{ route('appointments.index') }}" class="group flex items-center space-x-3 px-4 py-3 rounded-xl
+    {{ Request::is('appointments*') ? 'bg-gradient-to-r from-fuchsia-500 to-pink-600 text-white shadow-lg shadow-fuchsia-500/30' : 'text-gray-600 hover:bg-fuchsia-50 hover:text-fuchsia-700' }}">
+    <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+    </svg>
+    <span class="nav-text font-medium">Citas</span>
+</a>
+
+
+<a href="{{ route('branches.index') }}" class="group flex items-center space-x-3 px-4 py-3 rounded-xl
+    {{ Request::is('branches*') ? 'bg-gradient-to-r from-fuchsia-500 to-pink-600 text-white shadow-lg shadow-fuchsia-500/30' : 'text-gray-600 hover:bg-fuchsia-50 hover:text-fuchsia-700' }}">
+    <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/>
+    </svg>
+    <span class="nav-text font-medium">Sucursales</span>
+</a>
+
+
+<a href="{{ route('employees.index') }}" class="group flex items-center space-x-3 px-4 py-3 rounded-xl
+    {{ Request::is('employees*') ? 'bg-gradient-to-r from-fuchsia-500 to-pink-600 text-white shadow-lg shadow-fuchsia-500/30' : 'text-gray-600 hover:bg-fuchsia-50 hover:text-fuchsia-700' }}">
+    <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 8.646 4 4 0 010-8.646M12 3c-1.657 0-3 1.343-3 3 0 1.657 1.343 3 3 3s3-1.343 3-3c0-1.657-1.343-3-3-3zM12 14c-4.97 0-9 1.343-9 3v2.5h18v-2.5c0-1.657-4.03-3-9-3z"/>
+    </svg>
+    <span class="nav-text font-medium">Empleados</span>
+</a>
+
+<a href="{{ route('services.index') }}" class="group flex items-center space-x-3 px-4 py-3 rounded-xl
+    {{ Request::is('services*') ? 'bg-gradient-to-r from-fuchsia-500 to-pink-600 text-white shadow-lg shadow-fuchsia-500/30' : 'text-gray-600 hover:bg-fuchsia-50 hover:text-fuchsia-700' }}">
+    <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+    </svg>
+    <span class="nav-text font-medium">Servicios</span>
+</a>
+<a href="{{ route('courses.index') }}" class="group flex items-center space-x-3 px-4 py-3 rounded-xl
+    {{ Request::is('courses*') ? 'bg-gradient-to-r from-fuchsia-500 to-pink-600 text-white shadow-lg shadow-fuchsia-500/30' : 'text-gray-600 hover:bg-fuchsia-50 hover:text-fuchsia-700' }}">
+    <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C6.5 6.253 2 10.998 2 17s4.5 10.747 10 10.747c5.5 0 10-4.998 10-10.747S17.5 6.253 12 6.253z"/>
+    </svg>
+    <span class="nav-text font-medium">Cursos</span>
+</a>
 
                     <a href="#" class="group flex items-center space-x-3 px-4 py-3 rounded-xl text-gray-600 hover:bg-pink-50 hover:text-pink-700 transition-all duration-200">
                         <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -94,12 +130,7 @@ lg:static lg:translate-x-0 lg:w-auto">
                         <span class="nav-text font-medium">Calendario</span>
                     </a>
 
-                    <a href="#" class="group flex items-center space-x-3 px-4 py-3 rounded-xl text-gray-600 hover:bg-fuchsia-50 hover:text-fuchsia-700 transition-all duration-200">
-                        <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                        </svg>
-                        <span class="nav-text font-medium">Finanzas</span>
-                    </a>
+              
 
                     <a href="#" class="group flex items-center space-x-3 px-4 py-3 rounded-xl text-gray-600 hover:bg-pink-50 hover:text-pink-700 transition-all duration-200">
                         <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
