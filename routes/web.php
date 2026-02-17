@@ -3,9 +3,10 @@
 use App\Http\Controllers\AuthController;
 use Illuminate\Support\Facades\Route;
 
+// Redirigir la raíz al login
 Route::get('/', function () {
-    return view('home');
-})->name('home');
+    return redirect()->route('login');
+});
 
 Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
 Route::post('/login', [AuthController::class, 'login'])->name('login.post');
