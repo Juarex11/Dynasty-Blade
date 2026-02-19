@@ -9,6 +9,8 @@ use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\ServiceCategoryController;
 use App\Http\Controllers\ServiceController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\ClientController;
+use App\Http\Controllers\CourseOpeningController;
 
 Route::get('/', fn() => redirect()->route('login'));
 
@@ -82,6 +84,15 @@ Route::middleware('auth')->group(function () {
         Route::put('/{course}',       [CourseController::class, 'update'])->name('update');
         Route::delete('/{course}',    [CourseController::class, 'destroy'])->name('destroy');
     });
+// Clientes
+Route::resource('clients', ClientController::class);
+Route::post('clients/{client}/visit', [ClientController::class, 'registerVisit'])->name('clients.visit');
+
+// Aperturas de Curso
+Route::resource('course-openings', CourseOpeningController::class);
+Route::post('course-openings/sessions/{session}/attendance',
+    [CourseOpeningController::class, 'saveAttendance']
+)->name('course-openings.attendance');
 
     // Empleados
     Route::prefix('employees')->name('employees.')->group(function () {

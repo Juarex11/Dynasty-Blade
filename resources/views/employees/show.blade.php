@@ -59,7 +59,17 @@
         {{-- Info personal --}}
         <div class="bg-white rounded-2xl border border-gray-200 p-5 space-y-3">
             <h3 class="font-semibold text-gray-900">Información</h3>
-
+@if($employee->birth_date)
+<div>
+    <p class="text-xs text-gray-400">Fecha de nacimiento</p>
+    <p class="text-sm font-medium text-gray-700">
+        {{ $employee->birth_date->format('d/m/Y') }}
+        <span class="text-gray-500">
+            ({{ $employee->birth_date->age }} años)
+        </span>
+    </p>
+</div>
+@endif
             @if($employee->phone)
             <div class="flex items-center gap-3 text-sm text-gray-600">
                 <svg class="w-4 h-4 text-fuchsia-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -76,6 +86,7 @@
                 {{ $employee->email }}
             </div>
             @endif
+
 
             <div class="grid grid-cols-2 gap-3 pt-2 border-t border-gray-100">
                 <div>
@@ -198,7 +209,46 @@
                 </div>
             @endif
         </div>
-
+{{-- Cursos como Instructor --}}
+@php $instructorCourses = $employee->courses->where('pivot.role', 'instructor'); @endphp
+@if($instructorCourses->isNotEmpty())
+<div class="bg-white rounded-2xl border border-gray-200 p-5">
+    <div class="flex items-center justify-between mb-4">
+        <h3 class="font-semibold text-gray-900">Cursos como Instructor ({{ $instructorCourses->count() }})</h3>
+    </div>
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        @foreach($instructorCourses as $course)
+        <a href="{{ route('courses.show', $course) }}"
+           class="flex items-center gap-3 p-3 border border-gray-100 rounded-xl hover:border-fuchsia-200 hover:bg-fuchsia-50 transition-all group">
+            <div class="w-10 h-10 rounded-xl overflow-hidden flex-shrink-0 bg-fuchsia-50 flex items-center justify-center">
+                @if($course->cover_image)
+                    <img src="{{ asset('storage/' . $course->cover_image) }}" alt="" class="w-full h-full object-cover">
+                @else
+                    <svg class="w-5 h-5 text-fuchsia-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+                    </svg>
+                @endif
+            </div>
+            <div class="flex-1 min-w-0">
+                <p class="text-sm font-medium text-gray-900 truncate group-hover:text-fuchsia-700">
+                    {{ $course->name }}
+                </p>
+                <div class="flex items-center gap-2">
+                    @if($course->category)
+                        <span class="text-xs text-fuchsia-600">{{ $course->category->name }}</span>
+                    @endif
+                    <span class="text-xs text-gray-300">·</span>
+                    <span class="inline-flex items-center gap-1 text-xs font-semibold text-fuchsia-700 bg-fuchsia-50 px-1.5 py-0.5 rounded-full border border-fuchsia-100">
+                        Instructor
+                    </span>
+                </div>
+            </div>
+        </a>
+        @endforeach
+    </div>
+</div>
+@endif
         {{-- Horarios --}}
         <div class="bg-white rounded-2xl border border-gray-200 p-5">
             <div class="flex items-center justify-between mb-4">

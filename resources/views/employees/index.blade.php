@@ -83,6 +83,7 @@
                         <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider hidden sm:table-cell">Cargo</th>
                         <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider hidden md:table-cell">Sedes</th>
                         <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider hidden lg:table-cell">Servicios</th>
+                        <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider hidden lg:table-cell">Cursos</th>
                         <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider hidden lg:table-cell">Ingreso</th>
                         <th class="px-6 py-4 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Estado</th>
                         <th class="px-6 py-4 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">Acciones</th>
@@ -132,6 +133,19 @@
                         <td class="px-6 py-4 hidden lg:table-cell">
                             <span class="text-sm text-gray-600">{{ $employee->services_count }} servicios</span>
                         </td>
+                        <td class="px-6 py-4 hidden lg:table-cell">
+    @if($employee->instructor_courses_count > 0)
+        <span class="inline-flex items-center gap-1 text-sm text-fuchsia-600 font-medium">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+            </svg>
+            {{ $employee->instructor_courses_count }} curso{{ $employee->instructor_courses_count > 1 ? 's' : '' }}
+        </span>
+    @else
+        <span class="text-sm text-gray-400">—</span>
+    @endif
+</td>
                         <td class="px-6 py-4 hidden lg:table-cell">
                             <p class="text-sm text-gray-600">{{ $employee->hire_date->format('d/m/Y') }}</p>
                             <p class="text-xs text-gray-400">{{ $employee->tenure }}</p>

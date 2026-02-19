@@ -16,12 +16,11 @@ class EmployeeController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Employee::with(['branches', 'user'])
-            ->withCount('services');
-
-        if ($request->filled('branch')) {
-            $query->whereHas('branches', fn($q) => $q->where('branches.id', $request->branch));
-        }
+       $query = Employee::with(['branches', 'user'])
+    ->withCount([
+        'services',
+        'courses as instructor_courses_count' => fn($q) => $q->where('employee_course.role', 'instructor'),
+    ]);
 
         if ($request->filled('search')) {
             $query->where(function ($q) use ($request) {
@@ -41,13 +40,17 @@ class EmployeeController extends Controller
         return view('employees.index', compact('employees', 'branches'));
     }
 
-    public function create()
-    {
-        $branches = Branch::active()->orderBy('name')->get();
-        $services = Service::active()->with('category')->orderBy('name')->get();
+   public function create()
+{
+    $branches = Branch::active()->orderBy('name')->get();
+    $services = Service::active()->with('category')->orderBy('name')->get();
+    $courses  = \App\Models\Course::where('is_active', true)
+                    ->with('category')
+                    ->orderBy('name')
+                    ->get();
 
-        return view('employees.create', compact('branches', 'services'));
-    }
+    return view('employees.create', compact('branches', 'services', 'courses'));
+}
 
     public function store(Request $request)
     {
@@ -159,17 +162,18 @@ class EmployeeController extends Controller
             ->with('success', 'Empleado creado correctamente.');
     }
 
-    public function show(Employee $employee)
-    {
-        $employee->load([
-            'user',
-            'branches',
-            'services.category',
-            'schedules.branch',
-        ]);
+public function show(Employee $employee)
+{
+    $employee->load([
+        'user',
+        'branches',
+        'services.category',
+        'schedules.branch',
+        'courses',  // ← agregar esto
+    ]);
 
-        return view('employees.show', compact('employee'));
-    }
+    return view('employees.show', compact('employee'));
+}
 
     public function edit(Employee $employee)
     {

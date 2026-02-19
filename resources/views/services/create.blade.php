@@ -230,70 +230,116 @@
 
 {{-- ─── MODAL: Nueva Categoría ──────────────────────────────────────────── --}}
 <div id="category-modal" class="fixed inset-0 z-50 hidden">
-    {{-- Overlay --}}
     <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" onclick="closeCategoryModal()"></div>
 
-    {{-- Panel --}}
     <div class="absolute inset-x-4 top-1/2 -translate-y-1/2 max-w-md mx-auto bg-white rounded-2xl shadow-2xl p-6">
-        <div class="flex items-center justify-between mb-5">
-            <div>
-                <h3 class="text-lg font-bold text-gray-900">Nueva Categoría</h3>
-                <p class="text-sm text-gray-500">Se creará y seleccionará automáticamente</p>
-            </div>
-            <button type="button" onclick="closeCategoryModal()"
-                class="w-8 h-8 flex items-center justify-center rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-all">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                </svg>
+        
+        {{-- Tabs --}}
+        <div class="flex gap-1 mb-5 bg-gray-100 rounded-xl p-1">
+            <button type="button" onclick="switchTab('create')" id="tab-create"
+                class="flex-1 py-2 text-sm font-semibold rounded-lg transition-all bg-white text-gray-900 shadow-sm">
+                Nueva categoría
+            </button>
+            <button type="button" onclick="switchTab('manage')" id="tab-manage"
+                class="flex-1 py-2 text-sm font-semibold rounded-lg transition-all text-gray-500 hover:text-gray-700">
+                Gestionar
             </button>
         </div>
 
-        {{-- Error del modal --}}
-        <div id="modal-error" class="hidden mb-4 bg-red-50 border border-red-200 rounded-xl p-3">
-            <p class="text-sm text-red-600" id="modal-error-text"></p>
-        </div>
+        <button type="button" onclick="closeCategoryModal()"
+            class="absolute top-5 right-5 w-8 h-8 flex items-center justify-center rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-all">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+        </button>
 
-        <div class="space-y-4">
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1.5">Nombre <span class="text-pink-500">*</span></label>
-                <input type="text" id="modal-cat-name" autofocus
-                    class="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-fuchsia-300"
-                    placeholder="Ej: Cabello, Uñas, Pestañas...">
+        {{-- Tab: Crear --}}
+        <div id="tab-panel-create">
+            <p class="text-sm text-gray-500 mb-4">Se creará y seleccionará automáticamente</p>
+
+            <div id="modal-error" class="hidden mb-4 bg-red-50 border border-red-200 rounded-xl p-3">
+                <p class="text-sm text-red-600" id="modal-error-text"></p>
             </div>
 
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1.5">Descripción <span class="text-gray-400 font-normal">(opcional)</span></label>
-                <input type="text" id="modal-cat-description"
-                    class="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-fuchsia-300"
-                    placeholder="Breve descripción...">
-            </div>
-
-            <div class="grid grid-cols-2 gap-4">
+            <div class="space-y-4">
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1.5">Color</label>
-                    <div class="flex items-center gap-2">
-                        <input type="color" id="modal-cat-color" value="#d946ef"
-                            class="w-10 h-10 rounded-lg border border-gray-200 cursor-pointer p-1">
-                        <span class="text-sm text-gray-500">Identifica la categoría</span>
+                    <label class="block text-sm font-medium text-gray-700 mb-1.5">Nombre <span class="text-pink-500">*</span></label>
+                    <input type="text" id="modal-cat-name" autofocus
+                        class="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-fuchsia-300"
+                        placeholder="Ej: Cabello, Uñas, Pestañas...">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1.5">Descripción <span class="text-gray-400 font-normal">(opcional)</span></label>
+                    <input type="text" id="modal-cat-description"
+                        class="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-fuchsia-300"
+                        placeholder="Breve descripción...">
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1.5">Color</label>
+                        <div class="flex items-center gap-2">
+                            <input type="color" id="modal-cat-color" value="#d946ef"
+                                class="w-10 h-10 rounded-lg border border-gray-200 cursor-pointer p-1">
+                            <span class="text-sm text-gray-500">Identifica la categoría</span>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1.5">Orden</label>
+                        <input type="number" id="modal-cat-sort" value="0" min="0"
+                            class="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-fuchsia-300">
                     </div>
                 </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1.5">Orden</label>
-                    <input type="number" id="modal-cat-sort" value="0" min="0"
-                        class="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-fuchsia-300">
-                </div>
+            </div>
+
+            <div class="flex gap-3 mt-6">
+                <button type="button" onclick="closeCategoryModal()"
+                    class="flex-1 py-2.5 border border-gray-200 text-gray-600 font-semibold rounded-xl hover:bg-gray-50 transition-colors text-sm">
+                    Cancelar
+                </button>
+                <button type="button" onclick="saveCategory()" id="modal-save-btn"
+                    class="flex-1 bg-gradient-to-r from-fuchsia-500 to-pink-600 hover:from-fuchsia-600 hover:to-pink-700 text-white font-semibold py-2.5 rounded-xl shadow-lg shadow-fuchsia-500/30 transition-all text-sm">
+                    Crear y seleccionar
+                </button>
             </div>
         </div>
 
-        <div class="flex gap-3 mt-6">
+        {{-- Tab: Gestionar --}}
+        <div id="tab-panel-manage" class="hidden">
+            <p class="text-sm text-gray-500 mb-4">Elimina categorías que no tengan servicios asociados.</p>
+
+            <div id="manage-error" class="hidden mb-3 bg-red-50 border border-red-200 rounded-xl p-3">
+                <p class="text-sm text-red-600" id="manage-error-text"></p>
+            </div>
+
+            <div id="categories-list" class="space-y-2 max-h-72 overflow-y-auto pr-1">
+                @foreach($categories as $cat)
+                <div class="flex items-center justify-between p-3 border border-gray-100 rounded-xl hover:bg-gray-50 transition-all" id="cat-row-{{ $cat->id }}">
+                    <div class="flex items-center gap-2.5">
+                        <span class="w-3 h-3 rounded-full shrink-0" style="background-color: {{ $cat->color ?? '#d1d5db' }}"></span>
+                        <span class="text-sm font-medium text-gray-800">{{ $cat->name }}</span>
+                        @if($cat->services_count ?? $cat->services()->count() > 0)
+                            <span class="text-xs text-gray-400">({{ $cat->services()->count() }} servicios)</span>
+                        @endif
+                    </div>
+                    <button type="button"
+                        onclick="deleteCategory({{ $cat->id }}, '{{ addslashes($cat->name) }}')"
+                        class="w-7 h-7 flex items-center justify-center rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 transition-all"
+                        title="Eliminar categoría">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                        </svg>
+                    </button>
+                </div>
+                @endforeach
+
+                @if($categories->count() === 0)
+                <p class="text-sm text-gray-400 text-center py-6">No hay categorías creadas aún.</p>
+                @endif
+            </div>
+
             <button type="button" onclick="closeCategoryModal()"
-                class="flex-1 py-2.5 border border-gray-200 text-gray-600 font-semibold rounded-xl hover:bg-gray-50 transition-colors text-sm">
-                Cancelar
-            </button>
-            <button type="button" onclick="saveCategory()"
-                id="modal-save-btn"
-                class="flex-1 bg-gradient-to-r from-fuchsia-500 to-pink-600 hover:from-fuchsia-600 hover:to-pink-700 text-white font-semibold py-2.5 rounded-xl shadow-lg shadow-fuchsia-500/30 transition-all text-sm">
-                Crear y seleccionar
+                class="w-full mt-5 py-2.5 border border-gray-200 text-gray-600 font-semibold rounded-xl hover:bg-gray-50 transition-colors text-sm">
+                Cerrar
             </button>
         </div>
     </div>
@@ -322,16 +368,35 @@
         });
     }
 
-    // Sincronizar chips con el select al cargar (para old())
     const selectEl = document.getElementById('service_category_id');
     if (selectEl.value) selectCategory(selectEl.value, '');
     selectEl.addEventListener('change', () => selectCategory(selectEl.value, ''));
 
+    // ─── Tabs del modal ────────────────────────────────────────────────────────
+    function switchTab(tab) {
+        const panels = { create: 'tab-panel-create', manage: 'tab-panel-manage' };
+        const tabs   = { create: 'tab-create',        manage: 'tab-manage'        };
+
+        Object.entries(panels).forEach(([key, panelId]) => {
+            const isActive = key === tab;
+            document.getElementById(panelId).classList.toggle('hidden', !isActive);
+            const tabBtn = document.getElementById(tabs[key]);
+            tabBtn.classList.toggle('bg-white', isActive);
+            tabBtn.classList.toggle('text-gray-900', isActive);
+            tabBtn.classList.toggle('shadow-sm', isActive);
+            tabBtn.classList.toggle('text-gray-500', !isActive);
+        });
+
+        // Limpiar errores al cambiar pestaña
+        document.getElementById('modal-error').classList.add('hidden');
+        document.getElementById('manage-error').classList.add('hidden');
+    }
+
     // ─── Modal categoría ───────────────────────────────────────────────────────
     function openCategoryModal() {
         document.getElementById('category-modal').classList.remove('hidden');
+        switchTab('create');
         document.getElementById('modal-cat-name').focus();
-        document.getElementById('modal-error').classList.add('hidden');
     }
 
     function closeCategoryModal() {
@@ -344,10 +409,7 @@
 
     async function saveCategory() {
         const name = document.getElementById('modal-cat-name').value.trim();
-        if (!name) {
-            showModalError('El nombre de la categoría es obligatorio.');
-            return;
-        }
+        if (!name) { showModalError('El nombre de la categoría es obligatorio.'); return; }
 
         const btn = document.getElementById('modal-save-btn');
         btn.disabled = true;
@@ -370,14 +432,12 @@
             });
 
             const json = await response.json();
-
             if (!response.ok) {
-                const msg = json.errors?.name?.[0] ?? json.message ?? 'Error al crear la categoría.';
-                showModalError(msg);
+                showModalError(json.errors?.name?.[0] ?? json.message ?? 'Error al crear la categoría.');
                 return;
             }
 
-            // Agregar al select
+            // Agregar al select principal
             const select = document.getElementById('service_category_id');
             const option = new Option(json.name, json.id, true, true);
             select.appendChild(option);
@@ -394,7 +454,24 @@
                 chipsContainer.appendChild(chip);
             }
 
-            // Seleccionar la nueva categoría
+            // Agregar fila en pestaña Gestionar
+            const list = document.getElementById('categories-list');
+            const row = document.createElement('div');
+            row.id = `cat-row-${json.id}`;
+            row.className = 'flex items-center justify-between p-3 border border-gray-100 rounded-xl hover:bg-gray-50 transition-all';
+            row.innerHTML = `
+                <div class="flex items-center gap-2.5">
+                    <span class="w-3 h-3 rounded-full shrink-0" style="background-color: ${json.color ?? '#d1d5db'}"></span>
+                    <span class="text-sm font-medium text-gray-800">${json.name}</span>
+                </div>
+                <button type="button" onclick="deleteCategory(${json.id}, '${json.name.replace(/'/g, "\\'")}')"
+                    class="w-7 h-7 flex items-center justify-center rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 transition-all">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                    </svg>
+                </button>`;
+            list.appendChild(row);
+
             selectCategory(json.id, json.name);
             closeCategoryModal();
 
@@ -406,21 +483,63 @@
         }
     }
 
+    // ─── Eliminar categoría ────────────────────────────────────────────────────
+    async function deleteCategory(id, name) {
+        if (!confirm(`¿Eliminar la categoría "${name}"?\n\nSolo se puede eliminar si no tiene servicios asociados.`)) return;
+
+        try {
+            const response = await fetch(`/service-categories/${id}`, {
+                method: 'DELETE',
+                headers: {
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'Accept': 'application/json',
+                },
+            });
+
+            const json = await response.json().catch(() => ({}));
+
+            if (!response.ok) {
+                showManageError(json.message ?? 'No se pudo eliminar la categoría.');
+                return;
+            }
+
+            // Quitar fila del listado del modal
+            document.getElementById(`cat-row-${id}`)?.remove();
+
+            // Quitar del select principal
+            const select = document.getElementById('service_category_id');
+            const opt = select.querySelector(`option[value="${id}"]`);
+            if (opt) {
+                if (select.value == id) select.value = '';
+                opt.remove();
+            }
+
+            // Quitar chip
+            document.querySelector(`.category-chip[data-id="${id}"]`)?.remove();
+
+        } catch (e) {
+            showManageError('Error de conexión. Intenta nuevamente.');
+        }
+    }
+
     function showModalError(msg) {
         const el = document.getElementById('modal-error');
         document.getElementById('modal-error-text').textContent = msg;
         el.classList.remove('hidden');
     }
 
-    // Cerrar modal con Escape
+    function showManageError(msg) {
+        const el = document.getElementById('manage-error');
+        document.getElementById('manage-error-text').textContent = msg;
+        el.classList.remove('hidden');
+    }
+
     document.addEventListener('keydown', e => {
         if (e.key === 'Escape') closeCategoryModal();
     });
 
-    // Enter en el campo nombre del modal
     document.getElementById('modal-cat-name')?.addEventListener('keydown', e => {
         if (e.key === 'Enter') { e.preventDefault(); saveCategory(); }
     });
 </script>
-
 @endsection

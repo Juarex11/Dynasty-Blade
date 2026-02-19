@@ -97,16 +97,25 @@ class ServiceCategoryController extends Controller
             ->with('success', 'Categoría actualizada correctamente.');
     }
 
-    public function destroy(ServiceCategory $serviceCategory)
-    {
-        if ($serviceCategory->services()->count() > 0) {
-            return back()->with('error', 'No puedes eliminar una categoría que tiene servicios asociados.');
+   public function destroy(ServiceCategory $serviceCategory)
+{
+    if ($serviceCategory->services()->count() > 0) {
+        $message = 'No puedes eliminar una categoría que tiene servicios asociados.';
+        
+        if (request()->expectsJson()) {
+            return response()->json(['message' => $message], 422);
         }
-
-        $serviceCategory->delete();
-
-        return redirect()
-            ->route('service-categories.index')
-            ->with('success', 'Categoría eliminada.');
+        return back()->with('error', $message);
     }
+
+    $serviceCategory->delete();
+
+    if (request()->expectsJson()) {
+        return response()->json(['message' => 'Categoría eliminada correctamente.']);
+    }
+
+    return redirect()
+        ->route('service-categories.index')
+        ->with('success', 'Categoría eliminada.');
+}
 }
