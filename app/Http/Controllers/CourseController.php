@@ -15,7 +15,10 @@ class CourseController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Course::with(['category', 'branches'])->withCount(['employees', 'instructors', 'students']);
+        $query = Course::with(['category', 'branches'])
+            ->withCount('instructors')
+            // Suma de enrolled_count de todas las aperturas del curso
+            ->withSum('openings', 'enrolled_count');
 
         if ($request->filled('category')) $query->where('course_category_id', $request->category);
         if ($request->filled('branch'))   $query->whereHas('branches', fn($q) => $q->where('branches.id', $request->branch));
@@ -49,19 +52,14 @@ class CourseController extends Controller
             'cover_image'        => 'nullable|image|max:3072',
             'price'              => 'required|numeric|min:0',
             'price_max'          => 'nullable|numeric|min:0',
-            'duration_hours'     => 'required|numeric|min:0.5',
             'modality'           => 'required|in:presencial,online,mixto',
             'level'              => 'required|in:basico,intermedio,avanzado',
             'instructor'         => 'nullable|string|max:150',
             'max_students'       => 'nullable|integer|min:1',
             'branch_ids'         => 'nullable|array',
             'branch_ids.*'       => 'exists:branches,id',
-            // Instructores: empleados con rol instructor
             'instructor_ids'     => 'nullable|array',
             'instructor_ids.*'   => 'exists:employees,id',
-            // Estudiantes: empleados inscritos
-            'student_ids'        => 'nullable|array',
-            'student_ids.*'      => 'exists:employees,id',
         ]);
 
         $data['is_active']       = $request->boolean('is_active', true);
@@ -75,24 +73,15 @@ class CourseController extends Controller
                 $data['cover_image'] = $request->file('cover_image')->store('courses/covers', 'public');
             }
 
-            $course = Course::create($data);
+            $course = Course::create(collect($data)->except(['branch_ids', 'instructor_ids'])->toArray());
 
-            // Sedes
             if (!empty($data['branch_ids'])) {
                 $course->branches()->sync($data['branch_ids']);
             }
 
-            // Instructores
             $employeeSync = [];
             foreach ($request->input('instructor_ids', []) as $empId) {
                 $employeeSync[$empId] = ['role' => 'instructor'];
-            }
-            // Estudiantes (no pueden coincidir con instructores)
-            $instructorIds = $request->input('instructor_ids', []);
-            foreach ($request->input('student_ids', []) as $empId) {
-                if (!in_array($empId, $instructorIds)) {
-                    $employeeSync[$empId] = ['role' => 'estudiante', 'status' => 'inscrito', 'enrolled_at' => now()->toDateString()];
-                }
             }
             if (!empty($employeeSync)) {
                 $course->employees()->sync($employeeSync);
@@ -109,7 +98,7 @@ class CourseController extends Controller
 
     public function show(Course $course)
     {
-        $course->load(['category', 'branches', 'instructors', 'students']);
+        $course->load(['category', 'branches', 'instructors', 'openings']);
         return view('courses.show', compact('course'));
     }
 
@@ -133,7 +122,6 @@ class CourseController extends Controller
             'cover_image'        => 'nullable|image|max:3072',
             'price'              => 'required|numeric|min:0',
             'price_max'          => 'nullable|numeric|min:0',
-            'duration_hours'     => 'required|numeric|min:0.5',
             'modality'           => 'required|in:presencial,online,mixto',
             'level'              => 'required|in:basico,intermedio,avanzado',
             'instructor'         => 'nullable|string|max:150',
@@ -142,8 +130,6 @@ class CourseController extends Controller
             'branch_ids.*'       => 'exists:branches,id',
             'instructor_ids'     => 'nullable|array',
             'instructor_ids.*'   => 'exists:employees,id',
-            'student_ids'        => 'nullable|array',
-            'student_ids.*'      => 'exists:employees,id',
         ]);
 
         $data['is_active']       = $request->boolean('is_active');
@@ -157,28 +143,13 @@ class CourseController extends Controller
                 $data['cover_image'] = $request->file('cover_image')->store('courses/covers', 'public');
             }
 
-            $course->update(collect($data)->except(['branch_ids', 'instructor_ids', 'student_ids'])->toArray());
+            $course->update(collect($data)->except(['branch_ids', 'instructor_ids'])->toArray());
 
             $course->branches()->sync($request->input('branch_ids', []));
 
-            // Reconstruir pivot empleados
-            $employeeSync  = [];
-            $instructorIds = $request->input('instructor_ids', []);
-            $studentIds    = $request->input('student_ids', []);
-
-            foreach ($instructorIds as $empId) {
+            $employeeSync = [];
+            foreach ($request->input('instructor_ids', []) as $empId) {
                 $employeeSync[$empId] = ['role' => 'instructor'];
-            }
-            foreach ($studentIds as $empId) {
-                if (!in_array($empId, $instructorIds)) {
-                    // Preservar datos previos si ya estaba inscrito
-                    $existing = $course->employees()->where('employees.id', $empId)->first();
-                    $employeeSync[$empId] = [
-                        'role'        => 'estudiante',
-                        'status'      => $existing?->pivot->status ?? 'inscrito',
-                        'enrolled_at' => $existing?->pivot->enrolled_at ?? now()->toDateString(),
-                    ];
-                }
             }
             $course->employees()->sync($employeeSync);
 

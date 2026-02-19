@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Support\Facades\Hash;
 
 class Client extends Model
 {
@@ -16,15 +17,20 @@ class Client extends Model
         'acquisition_source', 'referred_by', 'hair_type',
         'services_interest', 'notes', 'tags',
         'visit_count', 'first_visit_at', 'last_visit_at', 'client_type', 'is_active',
+        // Nuevos
+        'username', 'password',
+        'client_mode',
     ];
 
     protected $casts = [
-        'birthdate'       => 'date',
-        'first_visit_at'  => 'date',
-        'last_visit_at'   => 'date',
+        'birthdate'         => 'date',
+        'first_visit_at'    => 'date',
+        'last_visit_at'     => 'date',
         'services_interest' => 'array',
-        'is_active'       => 'boolean',
+        'is_active'         => 'boolean',
     ];
+
+    protected $hidden = ['password'];
 
     // ── Accessors ──────────────────────────────────────────────────────────────
 
@@ -41,24 +47,33 @@ class Client extends Model
     public function getClientTypeLabelAttribute(): string
     {
         return match($this->client_type) {
-            'nuevo'     => 'Nuevo',
-            'recurrente'=> 'Recurrente',
-            'vip'       => 'VIP',
-            'inactivo'  => 'Inactivo',
-            'unico'     => 'Único',
-            default     => 'Nuevo',
+            'nuevo'      => 'Nuevo',
+            'recurrente' => 'Recurrente',
+            'vip'        => 'VIP',
+            'inactivo'   => 'Inactivo',
+            'unico'      => 'Único',
+            default      => 'Nuevo',
         };
     }
 
     public function getClientTypeColorAttribute(): string
     {
         return match($this->client_type) {
-            'nuevo'     => 'blue',
-            'recurrente'=> 'violet',
-            'vip'       => 'amber',
-            'inactivo'  => 'gray',
-            'unico'     => 'red',
-            default     => 'blue',
+            'nuevo'      => 'blue',
+            'recurrente' => 'violet',
+            'vip'        => 'amber',
+            'inactivo'   => 'gray',
+            'unico'      => 'red',
+            default      => 'blue',
+        };
+    }
+
+    public function getClientModeLabelAttribute(): string
+    {
+        return match($this->client_mode ?? 'frecuente') {
+            'frecuente' => 'Frecuente',
+            'ocasional' => 'Ocasional',
+            default     => 'Frecuente',
         };
     }
 
@@ -77,14 +92,18 @@ class Client extends Model
         };
     }
 
+    // ── Mutator password ───────────────────────────────────────────────────────
+
+    public function setPasswordAttribute(?string $value): void
+    {
+        $this->attributes['password'] = $value ? Hash::make($value) : null;
+    }
+
     // ── Métodos de negocio ─────────────────────────────────────────────────────
 
-    /**
-     * Recalcula el tipo de cliente según visitas y fechas.
-     */
     public function recalculateType(): void
     {
-        $now = now()->toDateString();
+        $now          = now()->toDateString();
         $daysSinceLast = $this->last_visit_at
             ? $this->last_visit_at->diffInDays($now)
             : null;
@@ -96,7 +115,6 @@ class Client extends Model
         } elseif ($this->visit_count >= 2) {
             $this->client_type = $daysSinceLast !== null && $daysSinceLast > 60 ? 'inactivo' : 'recurrente';
         } else {
-            // visit_count === 1
             $this->client_type = $daysSinceLast !== null && $daysSinceLast > 90 ? 'unico' : 'nuevo';
         }
     }
@@ -115,11 +133,12 @@ class Client extends Model
 
     // ── Scopes ─────────────────────────────────────────────────────────────────
 
-    public function scopeActive($q)           { return $q->where('is_active', true); }
-    public function scopeVip($q)              { return $q->where('client_type', 'vip'); }
-    public function scopeInactive($q)         { return $q->where('client_type', 'inactivo'); }
-    public function scopeUnique($q)           { return $q->where('client_type', 'unico'); }
-    public function scopeFrequent($q)         { return $q->whereIn('client_type', ['recurrente', 'vip']); }
+    public function scopeActive($q)    { return $q->where('is_active', true); }
+    public function scopeVip($q)       { return $q->where('client_type', 'vip'); }
+    public function scopeInactive($q)  { return $q->where('client_type', 'inactivo'); }
+    public function scopeUnique($q)    { return $q->where('client_type', 'unico'); }
+    public function scopeFrequent($q)  { return $q->where('client_mode', 'frecuente'); }
+    public function scopeOcasional($q) { return $q->where('client_mode', 'ocasional'); }
 
     // ── Relaciones ─────────────────────────────────────────────────────────────
 

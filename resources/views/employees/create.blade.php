@@ -30,9 +30,57 @@
     <form action="{{ route('employees.store') }}" method="POST" enctype="multipart/form-data" class="space-y-5">
         @csrf
 
-        {{-- Datos personales --}}
+        {{-- ── Datos personales ──────────────────────────────────────────────── --}}
         <div class="bg-white rounded-2xl border border-gray-200 p-6 space-y-4">
             <h2 class="font-semibold text-gray-900 text-base border-b border-gray-100 pb-3">Datos personales</h2>
+
+            {{-- Foto con preview ─────────────────────────────────────────────── --}}
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Foto de perfil</label>
+                <div class="flex items-start gap-4">
+
+                    {{-- Preview avatar --}}
+                    <div id="photo-preview-wrap" class="relative shrink-0">
+                        <div id="photo-placeholder"
+                             class="w-24 h-24 rounded-2xl bg-gradient-to-br from-fuchsia-100 to-pink-100 border-2 border-dashed border-fuchsia-300 flex flex-col items-center justify-center cursor-pointer hover:border-fuchsia-500 hover:bg-fuchsia-50 transition-all"
+                             onclick="document.getElementById('emp-photo').click()">
+                            <svg class="w-8 h-8 text-fuchsia-400 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                            </svg>
+                            <span class="text-xs text-fuchsia-400 font-medium">Subir foto</span>
+                        </div>
+                        <img id="photo-preview"
+                             src="" alt="Preview"
+                             class="hidden w-24 h-24 rounded-2xl object-cover border-2 border-fuchsia-300 shadow-md">
+                        {{-- Botón quitar foto --}}
+                        <button type="button" id="photo-remove"
+                                onclick="removePhoto()"
+                                class="hidden absolute -top-2 -right-2 w-6 h-6 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center shadow transition-colors">
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/>
+                            </svg>
+                        </button>
+                    </div>
+
+                    {{-- Info y botón --}}
+                    <div class="flex-1 pt-1">
+                        <p class="text-sm text-gray-600 mb-2">Sube una foto cuadrada para mejores resultados.</p>
+                        <p class="text-xs text-gray-400 mb-3">JPG, PNG o WEBP · Máx. 2 MB</p>
+                        <button type="button"
+                                onclick="document.getElementById('emp-photo').click()"
+                                class="inline-flex items-center gap-2 px-4 py-2 border border-fuchsia-300 text-fuchsia-600 font-medium text-sm rounded-xl hover:bg-fuchsia-50 transition-colors">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                            </svg>
+                            Seleccionar imagen
+                        </button>
+                        <p id="photo-filename" class="text-xs text-gray-400 mt-2 truncate max-w-xs"></p>
+                    </div>
+
+                    <input type="file" name="photo" id="emp-photo" accept="image/*" class="hidden"
+                           onchange="previewPhoto(this)">
+                </div>
+            </div>
 
             <div class="grid grid-cols-2 gap-4">
                 <div>
@@ -77,21 +125,9 @@
                         placeholder="empleado@email.com">
                 </div>
             </div>
-
-            {{-- Foto --}}
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1.5">Foto</label>
-                <div class="border-2 border-dashed border-gray-200 rounded-xl p-5 text-center hover:border-fuchsia-300 transition-colors cursor-pointer" onclick="document.getElementById('emp-photo').click()">
-                    <svg class="w-8 h-8 text-gray-300 mx-auto mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
-                    </svg>
-                    <p class="text-sm text-gray-500">Foto de perfil</p>
-                    <input type="file" name="photo" id="emp-photo" accept="image/*" class="hidden">
-                </div>
-            </div>
         </div>
 
-        {{-- Datos laborales --}}
+        {{-- ── Datos laborales ───────────────────────────────────────────────── --}}
         <div class="bg-white rounded-2xl border border-gray-200 p-6 space-y-4">
             <h2 class="font-semibold text-gray-900 text-base border-b border-gray-100 pb-3">Datos laborales</h2>
 
@@ -156,7 +192,7 @@
             </div>
         </div>
 
-        {{-- Sedes --}}
+        {{-- ── Sedes ─────────────────────────────────────────────────────────── --}}
         <div class="bg-white rounded-2xl border border-gray-200 p-6 space-y-4">
             <h2 class="font-semibold text-gray-900 text-base border-b border-gray-100 pb-3">Sedes donde trabaja <span class="text-pink-500">*</span></h2>
 
@@ -181,7 +217,7 @@
             </div>
         </div>
 
-        {{-- Servicios --}}
+        {{-- ── Servicios ─────────────────────────────────────────────────────── --}}
         <div class="bg-white rounded-2xl border border-gray-200 p-6 space-y-4">
             <h2 class="font-semibold text-gray-900 text-base border-b border-gray-100 pb-3">Servicios que realiza</h2>
 
@@ -208,71 +244,65 @@
             </div>
         </div>
 
-{{-- Cursos --}}
-<div class="bg-white rounded-2xl border border-gray-200 p-6 space-y-4">
-    <div class="flex items-center justify-between border-b border-gray-100 pb-3">
-        <div>
-            <h2 class="font-semibold text-gray-900 text-base">Cursos</h2>
-            <p class="text-xs text-gray-400 mt-0.5">Selecciona el rol del empleado en cada curso</p>
-        </div>
-        <a href="{{ route('courses.index') }}" class="text-xs text-violet-600 hover:underline">Ver todos →</a>
-    </div>
+        {{-- ── Cursos ────────────────────────────────────────────────────────── --}}
+        <div class="bg-white rounded-2xl border border-gray-200 p-6 space-y-4">
+            <div class="flex items-center justify-between border-b border-gray-100 pb-3">
+                <div>
+                    <h2 class="font-semibold text-gray-900 text-base">Cursos</h2>
+                    <p class="text-xs text-gray-400 mt-0.5">Selecciona el rol del empleado en cada curso</p>
+                </div>
+                <a href="{{ route('courses.index') }}" class="text-xs text-violet-600 hover:underline">Ver todos →</a>
+            </div>
 
-    @if($courses->isEmpty())
-        <p class="text-sm text-gray-400 text-center py-4">No hay cursos activos registrados.
-            <a href="{{ route('courses.create') }}" class="text-violet-600 hover:underline">Crear curso</a>
-        </p>
-    @else
-        @php $coursesByCategory = $courses->groupBy(fn($c) => $c->category->name); @endphp
-
-        {{-- ── Para el formulario de CREAR empleado ── --}}
-        {{-- old values para create --}}
-        @php
-            $selectedInstructorCourses = old('instructor_course_ids', []);
-            $selectedStudentCourses    = old('student_course_ids', []);
-            // Para edit: descomentar estas líneas y comentar las de arriba
-            // $selectedInstructorCourses = old('instructor_course_ids', $employee->teachingCourses->pluck('id')->toArray());
-            // $selectedStudentCourses    = old('student_course_ids', $employee->enrolledCourses->pluck('id')->toArray());
-        @endphp
-
-        <div class="space-y-4">
-            @foreach($coursesByCategory as $catName => $catCourses)
-            <div>
-                <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">{{ $catName }}</p>
-                <div class="space-y-2">
-                    @foreach($catCourses as $course)
-                    <div class="p-3 border border-gray-100 rounded-xl hover:border-violet-100 transition-colors">
-                        <div class="flex items-start justify-between gap-3">
-                            <div class="flex-1 min-w-0">
-                                <p class="text-sm font-medium text-gray-800 truncate">{{ $course->name }}</p>
-                                <p class="text-xs text-gray-400">{{ $course->price_display }} · {{ $course->duration_display }} · {{ $course->level_label }}</p>
-                            </div>
-                            {{-- Toggle de rol --}}
-                            <div class="flex items-center gap-3 shrink-0">
-                                <label class="flex items-center gap-1.5 cursor-pointer">
-                                    <input type="checkbox" name="instructor_course_ids[]" value="{{ $course->id }}"
-                                        {{ in_array($course->id, $selectedInstructorCourses) ? 'checked' : '' }}
-                                        class="w-4 h-4 text-violet-600 rounded border-gray-300 course-instructor-check" data-course="{{ $course->id }}">
-                                    <span class="text-xs font-medium text-violet-700">Instructor</span>
-                                </label>
-                                <label class="flex items-center gap-1.5 cursor-pointer">
-                                    <input type="checkbox" name="student_course_ids[]" value="{{ $course->id }}"
-                                        {{ in_array($course->id, $selectedStudentCourses) ? 'checked' : '' }}
-                                        class="w-4 h-4 text-green-600 rounded border-gray-300 course-student-check" data-course="{{ $course->id }}">
-                                    <span class="text-xs font-medium text-green-700">Estudiante</span>
-                                </label>
+            @if($courses->isEmpty())
+            <p class="text-sm text-gray-400 text-center py-4">No hay cursos activos.
+                <a href="{{ route('courses.create') }}" class="text-violet-600 hover:underline">Crear curso</a>
+            </p>
+            @else
+            @php
+                $coursesByCategory           = $courses->groupBy(fn($c) => $c->category->name);
+                $selectedInstructorCourses   = old('instructor_course_ids', []);
+                $selectedStudentCourses      = old('student_course_ids', []);
+            @endphp
+            <div class="space-y-4">
+                @foreach($coursesByCategory as $catName => $catCourses)
+                <div>
+                    <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">{{ $catName }}</p>
+                    <div class="space-y-2">
+                        @foreach($catCourses as $course)
+                        <div class="p-3 border border-gray-100 rounded-xl hover:border-violet-100 transition-colors">
+                            <div class="flex items-start justify-between gap-3">
+                                <div class="flex-1 min-w-0">
+                                    <p class="text-sm font-medium text-gray-800 truncate">{{ $course->name }}</p>
+                                    <p class="text-xs text-gray-400">{{ $course->price_display }} · {{ $course->level_label }}</p>
+                                </div>
+                                <div class="flex items-center gap-3 shrink-0">
+                                    <label class="flex items-center gap-1.5 cursor-pointer">
+                                        <input type="checkbox" name="instructor_course_ids[]" value="{{ $course->id }}"
+                                            {{ in_array($course->id, $selectedInstructorCourses) ? 'checked' : '' }}
+                                            class="w-4 h-4 text-violet-600 rounded border-gray-300 course-instructor-check"
+                                            data-course="{{ $course->id }}">
+                                        <span class="text-xs font-medium text-violet-700">Instructor</span>
+                                    </label>
+                                    <label class="flex items-center gap-1.5 cursor-pointer">
+                                        <input type="checkbox" name="student_course_ids[]" value="{{ $course->id }}"
+                                            {{ in_array($course->id, $selectedStudentCourses) ? 'checked' : '' }}
+                                            class="w-4 h-4 text-green-600 rounded border-gray-300 course-student-check"
+                                            data-course="{{ $course->id }}">
+                                        <span class="text-xs font-medium text-green-700">Estudiante</span>
+                                    </label>
+                                </div>
                             </div>
                         </div>
+                        @endforeach
                     </div>
-                    @endforeach
                 </div>
+                @endforeach
             </div>
-            @endforeach
+            @endif
         </div>
-    @endif
-</div>
 
-        {{-- Acceso al sistema --}}
+        {{-- ── Acceso al sistema ─────────────────────────────────────────────── --}}
         <div class="bg-white rounded-2xl border border-gray-200 p-6 space-y-4">
             <div class="flex items-center justify-between">
                 <div>
@@ -282,9 +312,11 @@
                 <label class="relative inline-flex items-center cursor-pointer">
                     <input type="hidden" name="has_system_access" value="0">
                     <input type="checkbox" name="has_system_access" value="1" id="has-access-toggle"
-                        {{ old('has_system_access') ? 'checked' : '' }}
-                        class="sr-only peer">
-                    <div class="w-11 h-6 bg-gray-200 peer-focus:ring-2 peer-focus:ring-fuchsia-300 rounded-full peer peer-checked:after:translate-x-full after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-gradient-to-r peer-checked:from-fuchsia-500 peer-checked:to-pink-600"></div>
+                        {{ old('has_system_access') ? 'checked' : '' }} class="sr-only peer">
+                    <div class="w-11 h-6 bg-gray-200 peer-focus:ring-2 peer-focus:ring-fuchsia-300 rounded-full peer
+                        peer-checked:after:translate-x-full after:absolute after:top-[2px] after:left-[2px]
+                        after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all
+                        peer-checked:bg-gradient-to-r peer-checked:from-fuchsia-500 peer-checked:to-pink-600"></div>
                 </label>
             </div>
 
@@ -292,14 +324,12 @@
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1.5">Nombre de usuario <span class="text-pink-500">*</span></label>
                     <input type="text" name="user_name" value="{{ old('user_name') }}"
-                        class="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-fuchsia-300"
-                        placeholder="Nombre completo">
+                        class="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-fuchsia-300">
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1.5">Email de acceso <span class="text-pink-500">*</span></label>
                     <input type="email" name="user_email" value="{{ old('user_email') }}"
-                        class="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-fuchsia-300"
-                        placeholder="acceso@email.com">
+                        class="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-fuchsia-300">
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1.5">Contraseña <span class="text-pink-500">*</span></label>
@@ -333,53 +363,91 @@
 </div>
 
 <script>
-// Toggle acceso al sistema
+// ─── Preview de foto ──────────────────────────────────────────────────────────
+function previewPhoto(input) {
+    const file        = input.files[0];
+    const preview     = document.getElementById('photo-preview');
+    const placeholder = document.getElementById('photo-placeholder');
+    const removeBtn   = document.getElementById('photo-remove');
+    const filename    = document.getElementById('photo-filename');
+
+    if (!file) return;
+
+    // Validar tamaño (2MB)
+    if (file.size > 2 * 1024 * 1024) {
+        alert('La imagen no puede superar los 2 MB.');
+        input.value = '';
+        return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = function (e) {
+        preview.src = e.target.result;
+        preview.classList.remove('hidden');
+        placeholder.classList.add('hidden');
+        removeBtn.classList.remove('hidden');
+        filename.textContent = file.name;
+    };
+    reader.readAsDataURL(file);
+}
+
+function removePhoto() {
+    const input       = document.getElementById('emp-photo');
+    const preview     = document.getElementById('photo-preview');
+    const placeholder = document.getElementById('photo-placeholder');
+    const removeBtn   = document.getElementById('photo-remove');
+    const filename    = document.getElementById('photo-filename');
+
+    input.value       = '';
+    preview.src       = '';
+    preview.classList.add('hidden');
+    placeholder.classList.remove('hidden');
+    removeBtn.classList.add('hidden');
+    filename.textContent = '';
+}
+
+// ─── Toggle acceso al sistema ─────────────────────────────────────────────────
 document.getElementById('has-access-toggle')?.addEventListener('change', function () {
     document.getElementById('access-fields').classList.toggle('hidden', !this.checked);
 });
 
-// Sede principal dinámica
-const checkboxes = document.querySelectorAll('.branch-checkbox');
-const primarySelector = document.getElementById('primary-branch-selector');
-const primarySelect = document.getElementById('primary-branch-select');
+// ─── Sede principal dinámica ──────────────────────────────────────────────────
+const checkboxes       = document.querySelectorAll('.branch-checkbox');
+const primarySelector  = document.getElementById('primary-branch-selector');
+const primarySelect    = document.getElementById('primary-branch-select');
 
 function updatePrimaryBranches() {
     const checked = [...checkboxes].filter(c => c.checked);
     primarySelector.classList.toggle('hidden', checked.length === 0);
-
     const currentValue = primarySelect.value;
     primarySelect.innerHTML = '<option value="">Seleccionar sede principal...</option>';
     checked.forEach(c => {
-        const opt = document.createElement('option');
-        opt.value = c.dataset.branchId;
+        const opt       = document.createElement('option');
+        opt.value       = c.dataset.branchId;
         opt.textContent = c.dataset.branchName;
         if (c.dataset.branchId === currentValue) opt.selected = true;
         primarySelect.appendChild(opt);
     });
-
-    // Si solo hay una sede marcada, seleccionarla automáticamente
-    if (checked.length === 1) {
-        primarySelect.value = checked[0].dataset.branchId;
-    }
+    if (checked.length === 1) primarySelect.value = checked[0].dataset.branchId;
 }
 
 checkboxes.forEach(c => c.addEventListener('change', updatePrimaryBranches));
 updatePrimaryBranches();
 
-// Evitar que el mismo curso sea instructor y estudiante a la vez
-document.querySelectorAll('.course-instructor-check').forEach(function(check) {
-    check.addEventListener('change', function() {
+// ─── Cursos: evitar instructor + estudiante al mismo tiempo ──────────────────
+document.querySelectorAll('.course-instructor-check').forEach(function (check) {
+    check.addEventListener('change', function () {
         if (this.checked) {
-            const studentCheck = document.querySelector(`.course-student-check[data-course="${this.dataset.course}"]`);
-            if (studentCheck) studentCheck.checked = false;
+            const student = document.querySelector(`.course-student-check[data-course="${this.dataset.course}"]`);
+            if (student) student.checked = false;
         }
     });
 });
-document.querySelectorAll('.course-student-check').forEach(function(check) {
-    check.addEventListener('change', function() {
+document.querySelectorAll('.course-student-check').forEach(function (check) {
+    check.addEventListener('change', function () {
         if (this.checked) {
-            const instrCheck = document.querySelector(`.course-instructor-check[data-course="${this.dataset.course}"]`);
-            if (instrCheck) instrCheck.checked = false;
+            const instr = document.querySelector(`.course-instructor-check[data-course="${this.dataset.course}"]`);
+            if (instr) instr.checked = false;
         }
     });
 });

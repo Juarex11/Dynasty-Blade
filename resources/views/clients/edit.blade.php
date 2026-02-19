@@ -1,18 +1,18 @@
 @extends('layouts.app')
 
-@section('title', 'Nuevo Cliente | Dynasty')
+@section('title', 'Editar ' . $client->full_name . ' | Dynasty')
 
 @section('content')
 
 <div class="max-w-2xl mx-auto">
 
     <div class="flex items-center gap-3 mb-6">
-        <a href="{{ route('clients.index') }}" class="w-9 h-9 flex items-center justify-center rounded-xl border border-gray-200 hover:border-violet-300 hover:bg-violet-50 text-gray-500 hover:text-violet-600 transition-all">
+        <a href="{{ route('clients.show', $client) }}" class="w-9 h-9 flex items-center justify-center rounded-xl border border-gray-200 hover:border-violet-300 hover:bg-violet-50 text-gray-500 hover:text-violet-600 transition-all">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
         </a>
         <div>
-            <h1 class="text-2xl font-bold text-gray-900">Nuevo Cliente</h1>
-            <p class="text-sm text-gray-500">Registra la información del cliente</p>
+            <h1 class="text-2xl font-bold text-gray-900">Editar cliente</h1>
+            <p class="text-sm text-gray-500">{{ $client->full_name }}</p>
         </div>
     </div>
 
@@ -24,40 +24,41 @@
     </div>
     @endif
 
-    <form action="{{ route('clients.store') }}" method="POST" enctype="multipart/form-data" class="space-y-5">
+    <form action="{{ route('clients.update', $client) }}" method="POST" enctype="multipart/form-data" class="space-y-5">
         @csrf
+        @method('PUT')
 
         {{-- ── Tipo de cliente ─────────────────────────────────────────────── --}}
         <div class="bg-white rounded-2xl border border-gray-200 p-6">
-            <h2 class="font-semibold text-gray-900 text-base border-b border-gray-100 pb-3 mb-4">Tipo de cliente <span class="text-pink-500">*</span></h2>
+            <h2 class="font-semibold text-gray-900 text-base border-b border-gray-100 pb-3 mb-4">Tipo de cliente</h2>
             <div class="grid grid-cols-2 gap-3">
                 <label id="mode-frecuente-label"
                     class="flex flex-col items-center gap-2 p-4 border-2 rounded-xl cursor-pointer transition-all
-                           {{ old('client_mode', 'frecuente') === 'frecuente' ? 'border-violet-400 bg-violet-50' : 'border-gray-200 hover:border-violet-200' }}">
+                           {{ old('client_mode', $client->client_mode) === 'frecuente' ? 'border-violet-400 bg-violet-50' : 'border-gray-200 hover:border-violet-200' }}">
                     <input type="radio" name="client_mode" value="frecuente"
-                        {{ old('client_mode', 'frecuente') === 'frecuente' ? 'checked' : '' }}
+                        {{ old('client_mode', $client->client_mode) === 'frecuente' ? 'checked' : '' }}
                         class="sr-only" onchange="toggleMode('frecuente')">
                     <div class="w-10 h-10 rounded-xl bg-violet-100 flex items-center justify-center">
                         <svg class="w-5 h-5 text-violet-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
                     </div>
                     <div class="text-center">
                         <p class="font-semibold text-gray-900 text-sm">Frecuente</p>
-                        <p class="text-xs text-gray-400 mt-0.5">Registra perfil completo, historial y datos de contacto</p>
+                        <p class="text-xs text-gray-400 mt-0.5">Registra perfil completo, historial y credenciales</p>
                     </div>
                 </label>
 
                 <label id="mode-ocasional-label"
                     class="flex flex-col items-center gap-2 p-4 border-2 rounded-xl cursor-pointer transition-all
-                           {{ old('client_mode') === 'ocasional' ? 'border-blue-400 bg-blue-50' : 'border-gray-200 hover:border-blue-200' }}">
+                           {{ old('client_mode', $client->client_mode) === 'ocasional' ? 'border-blue-400 bg-blue-50' : 'border-gray-200 hover:border-blue-200' }}">
                     <input type="radio" name="client_mode" value="ocasional"
-                        {{ old('client_mode') === 'ocasional' ? 'checked' : '' }}
+                        {{ old('client_mode', $client->client_mode) === 'ocasional' ? 'checked' : '' }}
                         class="sr-only" onchange="toggleMode('ocasional')">
                     <div class="w-10 h-10 rounded-xl bg-blue-100 flex items-center justify-center">
                         <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
                     </div>
                     <div class="text-center">
                         <p class="font-semibold text-gray-900 text-sm">Ocasional</p>
-                        <p class="text-xs text-gray-400 mt-0.5">Solo datos básicos, viene pocas veces o una sola vez</p>
+                        <p class="text-xs text-gray-400 mt-0.5">Solo datos básicos, sin perfil detallado</p>
                     </div>
                 </label>
             </div>
@@ -65,57 +66,66 @@
 
         {{-- ── Datos básicos (siempre visibles) ───────────────────────────── --}}
         <div class="bg-white rounded-2xl border border-gray-200 p-6 space-y-4">
-            <h2 class="font-semibold text-gray-900 text-base border-b border-gray-100 pb-3">Datos personales</h2>
+            <h2 class="font-semibold text-gray-900 text-base border-b border-gray-100 pb-3">Datos básicos</h2>
 
             <div class="grid grid-cols-2 gap-4">
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1.5">Nombre <span class="text-pink-500">*</span></label>
-                    <input type="text" name="first_name" value="{{ old('first_name') }}" required
-                        class="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-violet-300 @error('first_name') border-red-400 @enderror"
-                        placeholder="Nombre">
+                    <input type="text" name="first_name" value="{{ old('first_name', $client->first_name) }}" required
+                        class="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-violet-300 @error('first_name') border-red-400 @enderror">
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1.5">Apellido <span class="text-pink-500">*</span></label>
-                    <input type="text" name="last_name" value="{{ old('last_name') }}" required
-                        class="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-violet-300"
-                        placeholder="Apellido">
+                    <input type="text" name="last_name" value="{{ old('last_name', $client->last_name) }}" required
+                        class="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-violet-300">
                 </div>
             </div>
 
             <div class="grid grid-cols-2 gap-4">
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1.5">Teléfono / WhatsApp</label>
-                    <input type="text" name="phone" value="{{ old('phone') }}"
+                    <input type="text" name="phone" value="{{ old('phone', $client->phone) }}"
                         class="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-violet-300"
                         placeholder="9XX XXX XXX">
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1.5">DNI</label>
-                    <input type="text" name="dni" value="{{ old('dni') }}" maxlength="15"
+                    <input type="text" name="dni" value="{{ old('dni', $client->dni) }}" maxlength="15"
                         class="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-violet-300 @error('dni') border-red-400 @enderror"
                         placeholder="12345678">
                 </div>
             </div>
+
+            {{-- Estado activo --}}
+            <div class="flex items-center gap-3 pt-1">
+                <label class="relative inline-flex items-center cursor-pointer">
+                    <input type="hidden" name="is_active" value="0">
+                    <input type="checkbox" name="is_active" value="1" class="sr-only peer"
+                        {{ old('is_active', $client->is_active) ? 'checked' : '' }}>
+                    <div class="w-10 h-6 bg-gray-200 peer-focus:ring-2 peer-focus:ring-violet-300 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-violet-500"></div>
+                </label>
+                <span class="text-sm text-gray-700 font-medium">Cliente activo</span>
+            </div>
         </div>
 
-        {{-- ── Sección solo para frecuentes ───────────────────────────────── --}}
-        <div id="section-frecuente" class="{{ old('client_mode') === 'ocasional' ? 'hidden' : '' }} space-y-5">
+        {{-- ── Sección frecuente: Datos personales completos ──────────────── --}}
+        <div id="section-frecuente" class="{{ old('client_mode', $client->client_mode) === 'ocasional' ? 'hidden' : '' }} space-y-5">
 
             {{-- Datos personales extendidos --}}
             <div class="bg-white rounded-2xl border border-gray-200 p-6 space-y-4">
-                <h2 class="font-semibold text-gray-900 text-base border-b border-gray-100 pb-3">Datos adicionales</h2>
+                <h2 class="font-semibold text-gray-900 text-base border-b border-gray-100 pb-3">Datos personales</h2>
 
                 <div class="grid grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1.5">Fecha de nacimiento</label>
-                        <input type="date" name="birthdate" value="{{ old('birthdate') }}" max="{{ date('Y-m-d') }}"
-                            class="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-violet-300">
-                    </div>
-                    <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1.5">Email</label>
-                        <input type="email" name="email" value="{{ old('email') }}"
+                        <input type="email" name="email" value="{{ old('email', $client->email) }}"
                             class="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-violet-300 @error('email') border-red-400 @enderror"
                             placeholder="correo@ejemplo.com">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1.5">Fecha de nacimiento</label>
+                        <input type="date" name="birthdate" value="{{ old('birthdate', $client->birthdate?->format('Y-m-d')) }}" max="{{ date('Y-m-d') }}"
+                            class="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-violet-300">
                     </div>
                 </div>
 
@@ -124,7 +134,7 @@
                     <div class="flex gap-2 flex-wrap">
                         @foreach(['masculino'=>'Masculino','femenino'=>'Femenino','otro'=>'Otro','no_especifica'=>'Prefiero no decir'] as $val=>$lbl)
                         <label class="flex items-center gap-1.5 px-3 py-2 border border-gray-200 rounded-xl cursor-pointer hover:border-violet-300 transition-colors has-[:checked]:border-violet-400 has-[:checked]:bg-violet-50">
-                            <input type="radio" name="gender" value="{{ $val }}" {{ old('gender') === $val ? 'checked' : '' }} class="text-violet-600">
+                            <input type="radio" name="gender" value="{{ $val }}" {{ old('gender', $client->gender) === $val ? 'checked' : '' }} class="text-violet-600">
                             <span class="text-sm text-gray-700">{{ $lbl }}</span>
                         </label>
                         @endforeach
@@ -133,27 +143,25 @@
 
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1.5">Foto</label>
+                    @if($client->photo)
+                    <div class="flex items-center gap-3 mb-2">
+                        <img src="{{ asset('storage/'.$client->photo) }}" class="w-12 h-12 rounded-xl object-cover border border-gray-200">
+                        <p class="text-xs text-gray-500">Foto actual · Sube una nueva para reemplazarla</p>
+                    </div>
+                    @endif
                     <div class="border-2 border-dashed border-gray-200 rounded-xl p-4 text-center hover:border-violet-300 transition-colors cursor-pointer"
                          onclick="document.getElementById('photo-inp').click()">
-                        <svg class="w-7 h-7 text-gray-300 mx-auto mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
-                        </svg>
-                        <p class="text-sm text-gray-400" id="photo-label">Seleccionar foto</p>
+                        <p class="text-sm text-gray-400" id="photo-label">Seleccionar nueva foto</p>
                         <input type="file" name="photo" id="photo-inp" accept="image/*" class="hidden"
-                               onchange="document.getElementById('photo-label').textContent = this.files[0]?.name ?? 'Seleccionar foto'">
+                               onchange="document.getElementById('photo-label').textContent = this.files[0]?.name ?? 'Seleccionar nueva foto'">
                     </div>
                 </div>
             </div>
 
             {{-- Ubicación --}}
             <div class="bg-white rounded-2xl border border-gray-200 p-6 space-y-4">
-                <div class="flex items-center justify-between border-b border-gray-100 pb-3">
-                    <h2 class="font-semibold text-gray-900 text-base">Ubicación</h2>
-                    <span class="text-xs text-gray-400 flex items-center gap-1">
-                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                        Regiones Perú
-                    </span>
-                </div>
+                <h2 class="font-semibold text-gray-900 text-base border-b border-gray-100 pb-3">Ubicación</h2>
+
                 <div class="grid grid-cols-3 gap-3">
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1.5">Departamento</label>
@@ -177,9 +185,10 @@
                         </select>
                     </div>
                 </div>
+
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1.5">Dirección</label>
-                    <input type="text" name="address" value="{{ old('address') }}"
+                    <input type="text" name="address" value="{{ old('address', $client->address) }}"
                         class="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-violet-300"
                         placeholder="Av. / Calle / Jr. ...">
                 </div>
@@ -195,13 +204,13 @@
                         <select name="acquisition_source" class="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-violet-300 bg-white">
                             <option value="">Seleccionar...</option>
                             @foreach(['instagram'=>'📸 Instagram','facebook'=>'👥 Facebook','tiktok'=>'🎵 TikTok','google'=>'🔍 Google','referido'=>'🤝 Referido','walk_in'=>'🚶 Walk-in','whatsapp'=>'💬 WhatsApp','otro'=>'Otro'] as $v=>$l)
-                            <option value="{{ $v }}" {{ old('acquisition_source') === $v ? 'selected' : '' }}>{{ $l }}</option>
+                            <option value="{{ $v }}" {{ old('acquisition_source', $client->acquisition_source) === $v ? 'selected' : '' }}>{{ $l }}</option>
                             @endforeach
                         </select>
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1.5">¿Quién refirió? <span class="text-gray-400 font-normal">(nombre)</span></label>
-                        <input type="text" name="referred_by" value="{{ old('referred_by') }}"
+                        <label class="block text-sm font-medium text-gray-700 mb-1.5">¿Quién refirió?</label>
+                        <input type="text" name="referred_by" value="{{ old('referred_by', $client->referred_by) }}"
                             class="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-violet-300"
                             placeholder="Nombre del referidor">
                     </div>
@@ -212,7 +221,7 @@
                     <div class="flex gap-2 flex-wrap">
                         @foreach(['liso'=>'Liso','ondulado'=>'Ondulado','rizado'=>'Rizado','muy_rizado'=>'Muy rizado','otro'=>'Otro'] as $v=>$l)
                         <label class="flex items-center gap-1.5 px-3 py-2 border border-gray-200 rounded-xl cursor-pointer hover:border-violet-300 transition-colors has-[:checked]:border-violet-400 has-[:checked]:bg-violet-50 text-sm">
-                            <input type="radio" name="hair_type" value="{{ $v }}" {{ old('hair_type') === $v ? 'checked' : '' }} class="text-violet-600">
+                            <input type="radio" name="hair_type" value="{{ $v }}" {{ old('hair_type', $client->hair_type) === $v ? 'checked' : '' }} class="text-violet-600">
                             {{ $l }}
                         </label>
                         @endforeach
@@ -225,7 +234,7 @@
                         @foreach(['Corte','Color / Tinte','Mechas / Balayage','Alisado','Ondulado / Permanente','Tratamientos','Peinado','Manicure','Depilación','Maquillaje'] as $svc)
                         <label class="flex items-center gap-1.5 px-2.5 py-1.5 border border-gray-200 rounded-lg cursor-pointer hover:border-violet-300 transition-colors has-[:checked]:border-violet-400 has-[:checked]:bg-violet-50 text-xs">
                             <input type="checkbox" name="services_interest[]" value="{{ $svc }}"
-                                {{ in_array($svc, old('services_interest', [])) ? 'checked' : '' }}
+                                {{ in_array($svc, old('services_interest', $client->services_interest ?? [])) ? 'checked' : '' }}
                                 class="text-violet-600 w-3.5 h-3.5">
                             {{ $svc }}
                         </label>
@@ -235,7 +244,7 @@
 
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1.5">Etiquetas <span class="text-gray-400 font-normal">(separadas por coma)</span></label>
-                    <input type="text" name="tags" value="{{ old('tags') }}"
+                    <input type="text" name="tags" value="{{ old('tags', $client->tags) }}"
                         class="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-violet-300"
                         placeholder="novia, vip, cabello dañado...">
                 </div>
@@ -244,7 +253,7 @@
                     <label class="block text-sm font-medium text-gray-700 mb-1.5">Notas internas</label>
                     <textarea name="notes" rows="3"
                         class="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-violet-300 resize-none"
-                        placeholder="Preferencias, alergias, notas de atención...">{{ old('notes') }}</textarea>
+                        placeholder="Preferencias, alergias, notas de atención...">{{ old('notes', $client->notes) }}</textarea>
                 </div>
             </div>
 
@@ -254,89 +263,58 @@
                     <svg class="w-4 h-4 text-violet-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/></svg>
                     <h2 class="font-semibold text-gray-900 text-base">Credenciales de acceso <span class="text-gray-400 font-normal text-sm">(opcional)</span></h2>
                 </div>
-                <p class="text-xs text-gray-400">Para uso futuro en la app del cliente. Puedes dejarlo vacío por ahora.</p>
+                <p class="text-xs text-gray-400">Para uso futuro en la app del cliente. Dejar en blanco para no cambiar.</p>
+
                 <div class="grid grid-cols-2 gap-4">
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1.5">Usuario</label>
-                        <input type="text" name="username" value="{{ old('username') }}" autocomplete="off"
+                        <input type="text" name="username" value="{{ old('username', $client->username) }}" autocomplete="off"
                             class="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-violet-300 @error('username') border-red-400 @enderror"
                             placeholder="usuario123">
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1.5">Contraseña</label>
+                        <label class="block text-sm font-medium text-gray-700 mb-1.5">
+                            Contraseña
+                            @if($client->password)
+                            <span class="text-xs text-green-600 font-normal ml-1">✓ Ya tiene contraseña</span>
+                            @endif
+                        </label>
                         <input type="password" name="password" autocomplete="new-password"
                             class="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-violet-300"
-                            placeholder="Mínimo 6 caracteres">
+                            placeholder="{{ $client->password ? 'Dejar vacío para no cambiar' : 'Mínimo 6 caracteres' }}">
                     </div>
                 </div>
             </div>
 
-            {{-- Inscripción a curso --}}
-          @if($openings->isNotEmpty())
-<div class="bg-white rounded-2xl border border-gray-200 p-6 space-y-4">
-    <div class="flex items-center gap-2 border-b border-gray-100 pb-3">
-        <svg class="w-4 h-4 text-violet-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
-        </svg>
-        <h2 class="font-semibold text-gray-900 text-base">Inscribir a un curso <span class="text-gray-400 font-normal text-sm">(opcional)</span></h2>
-    </div>
-    <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1.5">Apertura disponible</label>
-        <select name="enroll_opening_id" id="enroll-opening"
-            class="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-violet-300 bg-white">
-            <option value="">No inscribir ahora</option>
-
-            @foreach($openings as $opening)
-                @php
-                    $max = $opening->max_students; // cupos totales
-                    $enrolled = $opening->enrolled_count; // inscritos actuales
-                    $remaining = $max ? max($max - $enrolled, 0) : '∞'; // cupos restantes, infinito si no hay límite
-                    $full = $max && $enrolled >= $max;
-                @endphp
-                <option value="{{ $opening->id }}"
-                        data-price="{{ $opening->effective_price ?? '' }}"
-                        data-full="{{ $full ? '1' : '0' }}"
-                        {{ $full ? 'disabled' : '' }}
-                        {{ old('enroll_opening_id') == $opening->id ? 'selected' : '' }}>
-                    {{ $opening->display_name }} — {{ $opening->start_date->format('d/m/Y') }}
-                    @if($opening->branch) · {{ $opening->branch->name }} @endif
-                    @if($max) · Cupos: {{ $remaining }} {{ $full ? '(LLENO)' : '' }} @endif
-                </option>
-            @endforeach
-        </select>
-    </div>
-</div>
-@endif
-
-
         </div>
         {{-- ── Fin sección frecuente ───────────────────────────────────────── --}}
 
+        {{-- Botones --}}
         <div class="flex gap-3 pb-6">
-            <a href="{{ route('clients.index') }}" class="flex-1 text-center py-3 border border-gray-200 text-gray-600 font-semibold rounded-xl hover:bg-gray-50 transition-colors">Cancelar</a>
-            <button type="submit" class="flex-1 bg-gradient-to-r from-violet-500 to-purple-600 hover:from-violet-600 hover:to-purple-700 text-white font-semibold py-3 rounded-xl shadow-lg shadow-violet-500/30 transition-all">Registrar Cliente</button>
+            <a href="{{ route('clients.show', $client) }}" class="flex-1 text-center py-3 border border-gray-200 text-gray-600 font-semibold rounded-xl hover:bg-gray-50 transition-colors">Cancelar</a>
+            <button type="submit" class="flex-1 bg-gradient-to-r from-violet-500 to-purple-600 hover:from-violet-600 hover:to-purple-700 text-white font-semibold py-3 rounded-xl shadow-lg shadow-violet-500/30 transition-all">Guardar cambios</button>
         </div>
     </form>
 </div>
 
 <script>
-// ── Toggle modo ───────────────────────────────────────────────────────────────
+// ── Toggle modo frecuente / ocasional ─────────────────────────────────────────
 function toggleMode(mode) {
-    const seccion  = document.getElementById('section-frecuente');
-    const lblFrec  = document.getElementById('mode-frecuente-label');
-    const lblOcas  = document.getElementById('mode-ocasional-label');
+    const seccion    = document.getElementById('section-frecuente');
+    const lblFrec    = document.getElementById('mode-frecuente-label');
+    const lblOcas    = document.getElementById('mode-ocasional-label');
 
     if (mode === 'frecuente') {
         seccion.classList.remove('hidden');
-        lblFrec.classList.add('border-violet-400', 'bg-violet-50');
+        lblFrec.classList.add('border-violet-400','bg-violet-50');
         lblFrec.classList.remove('border-gray-200');
-        lblOcas.classList.remove('border-blue-400', 'bg-blue-50');
+        lblOcas.classList.remove('border-blue-400','bg-blue-50');
         lblOcas.classList.add('border-gray-200');
     } else {
         seccion.classList.add('hidden');
-        lblOcas.classList.add('border-blue-400', 'bg-blue-50');
+        lblOcas.classList.add('border-blue-400','bg-blue-50');
         lblOcas.classList.remove('border-gray-200');
-        lblFrec.classList.remove('border-violet-400', 'bg-violet-50');
+        lblFrec.classList.remove('border-violet-400','bg-violet-50');
         lblFrec.classList.add('border-gray-200');
     }
 }
@@ -352,9 +330,9 @@ const selDept = document.getElementById('sel-department');
 const selProv = document.getElementById('sel-province');
 const selDist = document.getElementById('sel-district');
 
-const oldDept = @json(old('department', ''));
-const oldProv = @json(old('province', ''));
-const oldDist = @json(old('district', ''));
+const oldDept = @json(old('department', $client->department ?? ''));
+const oldProv = @json(old('province',   $client->province   ?? ''));
+const oldDist = @json(old('district',   $client->district   ?? ''));
 
 function loadDepartments() {
     selDept.innerHTML = '<option value="">Seleccionar departamento</option>';
@@ -413,22 +391,6 @@ selProv.addEventListener('change', function () {
 });
 
 loadDepartments();
-
-// ── Inscripción a curso ───────────────────────────────────────────────────────
-const enrollSelect  = document.getElementById('enroll-opening');
-const enrollDetails = document.getElementById('enroll-details');
-const enrollPrice   = document.getElementById('enroll-price');
-
-if (enrollSelect) {
-    enrollSelect.addEventListener('change', function () {
-        const opt = this.options[this.selectedIndex];
-        if (this.value) {
-            enrollDetails.classList.remove('hidden');
-            if (opt.dataset.price) enrollPrice.value = opt.dataset.price;
-        } else {
-            enrollDetails.classList.add('hidden');
-        }
-    });
-}
 </script>
+
 @endsection

@@ -13,14 +13,13 @@ class Course extends Model
 
     protected $fillable = [
         'course_category_id', 'name', 'slug', 'short_description', 'description',
-        'cover_image', 'price', 'price_max', 'duration_hours', 'modality', 'level',
+        'cover_image', 'price', 'price_max', 'modality', 'level',
         'instructor', 'max_students', 'has_certificate', 'is_active', 'is_featured', 'sort_order',
     ];
 
     protected $casts = [
         'price'          => 'float',
         'price_max'      => 'float',
-        'duration_hours' => 'float',
         'has_certificate'=> 'boolean',
         'is_active'      => 'boolean',
         'is_featured'    => 'boolean',
@@ -46,7 +45,7 @@ class Course extends Model
             ->withTimestamps();
     }
 
-    /** Todos los empleados vinculados (estudiantes e instructores) */
+    /** Todos los empleados vinculados al curso (instructores) */
     public function employees()
     {
         return $this->belongsToMany(Employee::class, 'employee_course')
@@ -63,13 +62,10 @@ class Course extends Model
             ->withTimestamps();
     }
 
-    /** Solo los estudiantes */
-    public function students()
+    /** Aperturas (ediciones/grupos) de este curso */
+    public function openings()
     {
-        return $this->belongsToMany(Employee::class, 'employee_course')
-            ->withPivot('role', 'status', 'enrolled_at', 'completed_at', 'score', 'notes')
-            ->wherePivot('role', 'estudiante')
-            ->withTimestamps();
+        return $this->hasMany(CourseOpening::class);
     }
 
     // ─── Scopes ────────────────────────────────────────────────────────────────
@@ -90,13 +86,14 @@ class Course extends Model
         return 'S/. ' . number_format($this->price, 0);
     }
 
-    public function getDurationDisplayAttribute(): string
+    /**
+     * Total de estudiantes inscritos en todas las aperturas de este curso.
+     * Usar con ->withSum('openings', 'enrolled_count') en el query.
+     */
+    public function getOpeningsEnrolledCountAttribute(): int
     {
-        $h = floor($this->duration_hours);
-        $m = ($this->duration_hours - $h) * 60;
-        if ($h > 0 && $m > 0) return "{$h}h {$m}min";
-        if ($h > 0) return "{$h}h";
-        return "{$m}min";
+        // Populated by withSum() as 'openings_sum_enrolled_count'
+        return (int) ($this->openings_sum_enrolled_count ?? 0);
     }
 
     public function getModalityLabelAttribute(): string

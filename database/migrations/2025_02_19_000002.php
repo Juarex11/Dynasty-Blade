@@ -23,6 +23,7 @@ return new class extends Migration
             $table->unsignedSmallInteger('max_students')->nullable();
             $table->unsignedSmallInteger('enrolled_count')->default(0);
             $table->decimal('price', 10, 2)->nullable();
+            $table->json('session_times')->nullable();
             $table->decimal('price_promo', 10, 2)->nullable();
             $table->date('promo_until')->nullable();
             $table->string('promo_label', 80)->nullable();

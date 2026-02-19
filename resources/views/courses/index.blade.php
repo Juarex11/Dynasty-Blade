@@ -29,7 +29,9 @@
 
 @if(session('success'))
 <div class="mb-5 bg-green-50 border border-green-200 rounded-xl p-4 flex items-center gap-3">
-    <svg class="w-5 h-5 text-green-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+    <svg class="w-5 h-5 text-green-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+    </svg>
     <p class="text-sm font-medium text-green-700">{{ session('success') }}</p>
 </div>
 @endif
@@ -52,9 +54,9 @@
         </select>
         <select name="level" class="px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-violet-300 bg-white">
             <option value="">Todos los niveles</option>
-            <option value="basico" {{ request('level') === 'basico' ? 'selected' : '' }}>Básico</option>
+            <option value="basico"     {{ request('level') === 'basico'     ? 'selected' : '' }}>Básico</option>
             <option value="intermedio" {{ request('level') === 'intermedio' ? 'selected' : '' }}>Intermedio</option>
-            <option value="avanzado" {{ request('level') === 'avanzado' ? 'selected' : '' }}>Avanzado</option>
+            <option value="avanzado"   {{ request('level') === 'avanzado'   ? 'selected' : '' }}>Avanzado</option>
         </select>
         <div class="flex gap-2">
             <select name="branch" class="flex-1 px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-violet-300 bg-white">
@@ -82,12 +84,18 @@
 @else
 <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
     @foreach($courses as $course)
+    @php
+        // Suma de enrolled_count de todas las aperturas de este curso
+        $totalOpeningStudents = $course->openings_enrolled_count ?? 0;
+    @endphp
     <div class="bg-white rounded-2xl border border-gray-200 overflow-hidden hover:shadow-md hover:border-violet-200 transition-all group">
+
         {{-- Cover --}}
         <div class="h-36 overflow-hidden relative"
              style="background: linear-gradient(135deg, {{ $course->category->color ?? '#8b5cf6' }}20, {{ $course->category->color ?? '#8b5cf6' }}10)">
             @if($course->cover_image)
-            <img src="{{ asset('storage/' . $course->cover_image) }}" alt="{{ $course->name }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+            <img src="{{ asset('storage/' . $course->cover_image) }}" alt="{{ $course->name }}"
+                 class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
             @else
             <div class="w-full h-full flex items-center justify-center">
                 <svg class="w-12 h-12 opacity-20" fill="none" stroke="{{ $course->category->color ?? '#8b5cf6' }}" viewBox="0 0 24 24">
@@ -95,14 +103,17 @@
                 </svg>
             </div>
             @endif
-            {{-- Badges --}}
-            <div class="absolute top-2 left-2 flex gap-1.5">
+
+            {{-- Badge categoría --}}
+            <div class="absolute top-2 left-2">
                 <span class="px-2 py-0.5 rounded-full text-xs font-semibold text-white"
                       style="background-color: {{ $course->category->color ?? '#8b5cf6' }}">
                     {{ $course->category->name }}
                 </span>
             </div>
-            <div class="absolute top-2 right-2 flex gap-1.5">
+
+            {{-- Badge nivel --}}
+            <div class="absolute top-2 right-2">
                 @php $lc = $course->level_color @endphp
                 <span class="px-2 py-0.5 rounded-full text-xs font-semibold
                     {{ $lc === 'green' ? 'bg-green-100 text-green-700' : ($lc === 'amber' ? 'bg-amber-100 text-amber-700' : 'bg-red-100 text-red-700') }}">
@@ -117,23 +128,42 @@
             <p class="text-xs text-gray-500 mb-3 line-clamp-2">{{ $course->short_description }}</p>
             @endif
 
+            {{-- Precio + modalidad --}}
             <div class="flex items-center justify-between text-sm mb-3">
-                <span class="font-semibold" style="color: {{ $course->category->color ?? '#8b5cf6' }}">{{ $course->price_display }}</span>
-                <span class="text-gray-400 text-xs flex items-center gap-1">
-                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                    {{ $course->duration_display }}
+                <span class="font-semibold" style="color: {{ $course->category->color ?? '#8b5cf6' }}">
+                    {{ $course->price_display }}
+                </span>
+                <span class="text-xs px-2 py-0.5 rounded-lg bg-gray-100 text-gray-500 font-medium">
+                    {{ $course->modality_label }}
                 </span>
             </div>
 
+            {{-- Footer stats --}}
             <div class="flex items-center justify-between pt-3 border-t border-gray-100 text-xs text-gray-500">
-                <span class="flex items-center gap-1">
-                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
-                    {{ $course->students_count }} estudiantes
+
+                {{-- Estudiantes en aperturas --}}
+                <span class="flex items-center gap-1" title="Estudiantes inscritos en aperturas">
+                    <svg class="w-3.5 h-3.5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
+                    </svg>
+                    <span>
+                        {{ $totalOpeningStudents }}
+                        @if($course->max_students)
+                        <span class="text-gray-400">/ {{ $course->max_students }}</span>
+                        @endif
+                        alumnos
+                    </span>
                 </span>
-                <span class="flex items-center gap-1">
-                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
-                    {{ $course->instructors_count }} instructores
+
+                {{-- Instructores --}}
+                <span class="flex items-center gap-1" title="Instructores del equipo">
+                    <svg class="w-3.5 h-3.5 text-violet-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                    </svg>
+                    {{ $course->instructors_count }} instructor(es)
                 </span>
+
+                {{-- Acciones --}}
                 <div class="flex gap-2">
                     <a href="{{ route('courses.show', $course) }}" class="text-violet-600 hover:underline font-medium">Ver</a>
                     <a href="{{ route('courses.edit', $course) }}" class="text-gray-500 hover:text-gray-700">Editar</a>

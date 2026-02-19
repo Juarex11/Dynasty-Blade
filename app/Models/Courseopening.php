@@ -12,19 +12,21 @@ class CourseOpening extends Model
     protected $fillable = [
         'course_id', 'branch_id', 'code', 'name',
         'start_date', 'end_date', 'time_start', 'time_end',
-        'days_of_week', 'total_sessions', 'max_students', 'enrolled_count',
+        'days_of_week', 'session_times',
+        'total_sessions', 'max_students', 'enrolled_count',
         'price', 'price_promo', 'promo_until', 'promo_label',
         'status', 'notes',
     ];
 
     protected $casts = [
-        'start_date'   => 'date',
-        'end_date'     => 'date',
-        'promo_until'  => 'date',
-        'days_of_week' => 'array',
+        'start_date'    => 'date',
+        'end_date'      => 'date',
+        'promo_until'   => 'date',
+        'days_of_week'  => 'array',
+        'session_times' => 'array', // [dayNum => ['start' => 'HH:MM', 'end' => 'HH:MM']]
     ];
 
-    // Días de semana en español
+    /** Nombres cortos de días */
     public static array $DAY_NAMES = [1=>'Lun',2=>'Mar',3=>'Mié',4=>'Jue',5=>'Vie',6=>'Sáb',7=>'Dom'];
 
     public function getDaysLabelAttribute(): string
@@ -33,6 +35,23 @@ class CourseOpening extends Model
         return collect($this->days_of_week)
             ->map(fn($d) => self::$DAY_NAMES[$d] ?? $d)
             ->join(', ');
+    }
+
+    /** Resumen de horarios por día: "Lun 09:00–11:00 / Mié 14:00–16:00" */
+    public function getScheduleSummaryAttribute(): string
+    {
+        if (!$this->session_times || !$this->days_of_week) return $this->days_label;
+
+        return collect($this->days_of_week)->map(function ($d) {
+            $label = self::$DAY_NAMES[$d] ?? $d;
+            $times = $this->session_times[$d] ?? null;
+            if ($times) {
+                $s = substr($times['start'] ?? '', 0, 5);
+                $e = substr($times['end']   ?? '', 0, 5);
+                return $label . ($s ? " {$s}" : '') . ($e ? "–{$e}" : '');
+            }
+            return $label;
+        })->join(' / ');
     }
 
     public function getStatusLabelAttribute(): string
@@ -113,73 +132,4 @@ class CourseOpening extends Model
     // ── Scopes ────────────────────────────────────────────────────────────────
     public function scopeActive($q)     { return $q->whereIn('status', ['publicado','en_curso']); }
     public function scopeUpcoming($q)   { return $q->where('start_date', '>=', now()->toDateString()); }
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-
-class CourseSession extends Model
-{
-    protected $fillable = [
-        'course_opening_id','session_number','date',
-        'time_start','time_end','topic','status','notes',
-    ];
-
-    protected $casts = ['date' => 'date'];
-
-    public function opening(): BelongsTo { return $this->belongsTo(CourseOpening::class, 'course_opening_id'); }
-
-    public function attendances(): HasMany { return $this->hasMany(CourseAttendance::class); }
-
-    public function getStatusLabelAttribute(): string
-    {
-        return match($this->status) {
-            'programada'  => 'Programada',
-            'realizada'   => 'Realizada',
-            'cancelada'   => 'Cancelada',
-            'postergada'  => 'Postergada',
-            default       => $this->status,
-        };
-    }
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-
-class CourseOpeningStudent extends Model
-{
-    protected $table = 'course_opening_student';
-
-    protected $fillable = [
-        'course_opening_id','employee_id','client_id',
-        'price_paid','payment_status','enrolled_at','status','certificate_issued','notes',
-    ];
-
-    protected $casts = [
-        'enrolled_at'        => 'date',
-        'certificate_issued' => 'boolean',
-    ];
-
-    public function opening(): BelongsTo  { return $this->belongsTo(CourseOpening::class, 'course_opening_id'); }
-    public function employee(): BelongsTo { return $this->belongsTo(Employee::class); }
-    public function client(): BelongsTo   { return $this->belongsTo(Client::class); }
-    public function attendances(): HasMany { return $this->hasMany(CourseAttendance::class, 'course_opening_student_id'); }
-
-    public function getPersonNameAttribute(): string
-    {
-        return $this->employee?->full_name ?? $this->client?->full_name ?? '—';
-    }
-
-    public function getPersonTypeAttribute(): string
-    {
-        return $this->employee_id ? 'employee' : 'client';
-    }
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-
-class CourseAttendance extends Model
-{
-    protected $fillable = ['course_session_id','course_opening_student_id','status','observation'];
-
-    public function session(): BelongsTo    { return $this->belongsTo(CourseSession::class, 'course_session_id'); }
-    public function enrollment(): BelongsTo { return $this->belongsTo(CourseOpeningStudent::class, 'course_opening_student_id'); }
 }

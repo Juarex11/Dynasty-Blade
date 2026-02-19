@@ -53,7 +53,7 @@
                         @foreach($categories as $cat)
                         <button type="button" onclick="selectCat({{ $cat->id }}, '{{ addslashes($cat->name) }}')"
                             class="cat-chip px-2.5 py-1 rounded-lg text-xs font-medium border transition-all {{ old('course_category_id') == $cat->id ? 'border-violet-400 bg-violet-50 text-violet-700' : 'border-gray-200 bg-gray-50 text-gray-600 hover:border-violet-300 hover:bg-violet-50 hover:text-violet-700' }}"
-                            data-id="{{ $cat->id }}" style="{{ old('course_category_id') == $cat->id ? 'border-color:'.($cat->color ?? '#8b5cf6') : '' }}">
+                            data-id="{{ $cat->id }}">
                             {{ $cat->name }}
                         </button>
                         @endforeach
@@ -96,9 +96,9 @@
             </div>
         </div>
 
-        {{-- Precio, duración y modalidad --}}
+        {{-- Precio y modalidad --}}
         <div class="bg-white rounded-2xl border border-gray-200 p-6 space-y-4">
-            <h2 class="font-semibold text-gray-900 text-base border-b border-gray-100 pb-3">Precio, duración y modalidad</h2>
+            <h2 class="font-semibold text-gray-900 text-base border-b border-gray-100 pb-3">Precio y modalidad</h2>
 
             <div class="grid grid-cols-2 gap-4">
                 <div>
@@ -117,12 +117,6 @@
 
             <div class="grid grid-cols-3 gap-4">
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1.5">Duración (horas) <span class="text-pink-500">*</span></label>
-                    <input type="number" name="duration_hours" value="{{ old('duration_hours', 2) }}" required min="0.5" step="0.5"
-                        class="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-violet-300"
-                        placeholder="2">
-                </div>
-                <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1.5">Modalidad <span class="text-pink-500">*</span></label>
                     <select name="modality" required class="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-violet-300 bg-white">
                         <option value="presencial" {{ old('modality') === 'presencial' ? 'selected' : '' }}>Presencial</option>
@@ -138,21 +132,19 @@
                         <option value="avanzado"    {{ old('level') === 'avanzado'    ? 'selected' : '' }}>Avanzado</option>
                     </select>
                 </div>
-            </div>
-
-            <div class="grid grid-cols-2 gap-4">
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1.5">Instructor externo <span class="text-gray-400 font-normal">(nombre libre)</span></label>
-                    <input type="text" name="instructor" value="{{ old('instructor') }}"
-                        class="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-violet-300"
-                        placeholder="Nombre del instructor externo">
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1.5">Máximo de estudiantes</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-1.5">Máx. estudiantes</label>
                     <input type="number" name="max_students" value="{{ old('max_students') }}" min="1"
                         class="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-violet-300"
                         placeholder="Sin límite">
                 </div>
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1.5">Instructor externo <span class="text-gray-400 font-normal">(nombre libre)</span></label>
+                <input type="text" name="instructor" value="{{ old('instructor') }}"
+                    class="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-violet-300"
+                    placeholder="Nombre del instructor externo">
             </div>
         </div>
 
@@ -195,40 +187,6 @@
                             <img src="{{ asset('storage/' . $emp->photo) }}" class="w-full h-full object-cover">
                             @else
                             <div class="w-full h-full bg-violet-100 flex items-center justify-center text-violet-600 text-xs font-bold">{{ strtoupper(substr($emp->first_name, 0, 1)) }}</div>
-                            @endif
-                        </div>
-                        <div class="min-w-0">
-                            <p class="text-sm font-medium text-gray-800 truncate">{{ $emp->full_name }}</p>
-                            <p class="text-xs text-gray-400 truncate">{{ $emp->position }}</p>
-                        </div>
-                    </div>
-                </label>
-                @endforeach
-            </div>
-            @endif
-        </div>
-
-        {{-- Estudiantes del equipo --}}
-        <div class="bg-white rounded-2xl border border-gray-200 p-6 space-y-4">
-            <div>
-                <h2 class="font-semibold text-gray-900 text-base">Inscribir empleados</h2>
-                <p class="text-xs text-gray-400 mt-0.5">Empleados que tomarán el curso como estudiantes</p>
-            </div>
-            @if($employees->isEmpty())
-            <p class="text-sm text-gray-400">No hay empleados activos registrados.</p>
-            @else
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                @foreach($employees as $emp)
-                <label class="flex items-center gap-2.5 p-2.5 border border-gray-100 rounded-xl cursor-pointer hover:border-green-200 hover:bg-green-50 transition-all has-[:checked]:border-green-300 has-[:checked]:bg-green-50">
-                    <input type="checkbox" name="student_ids[]" value="{{ $emp->id }}"
-                        {{ in_array($emp->id, old('student_ids', [])) ? 'checked' : '' }}
-                        class="w-4 h-4 text-green-600 rounded border-gray-300 student-check" data-id="{{ $emp->id }}">
-                    <div class="flex items-center gap-2 min-w-0">
-                        <div class="w-7 h-7 rounded-full overflow-hidden shrink-0">
-                            @if($emp->photo)
-                            <img src="{{ asset('storage/' . $emp->photo) }}" class="w-full h-full object-cover">
-                            @else
-                            <div class="w-full h-full bg-green-100 flex items-center justify-center text-green-700 text-xs font-bold">{{ strtoupper(substr($emp->first_name, 0, 1)) }}</div>
                             @endif
                         </div>
                         <div class="min-w-0">
@@ -320,7 +278,6 @@
 </div>
 
 <script>
-// ─── Chips de categoría ────────────────────────────────────────────────────────
 function selectCat(id, name) {
     document.getElementById('course_category_id').value = id;
     document.querySelectorAll('.cat-chip').forEach(c => {
@@ -337,7 +294,6 @@ const sel = document.getElementById('course_category_id');
 if (sel.value) selectCat(sel.value, '');
 sel.addEventListener('change', () => selectCat(sel.value, ''));
 
-// ─── Modal categoría ──────────────────────────────────────────────────────────
 function openCatModal() {
     document.getElementById('cat-modal').classList.remove('hidden');
     document.getElementById('modal-name').focus();
@@ -363,10 +319,8 @@ async function saveCategory() {
         });
         const json = await res.json();
         if (!res.ok) { showModalErr(json.errors?.name?.[0] ?? json.message ?? 'Error.'); return; }
-        // Agregar al select
         const opt = new Option(json.name, json.id, true, true);
         document.getElementById('course_category_id').appendChild(opt);
-        // Agregar chip
         const chips = document.getElementById('cat-chips');
         if (chips) {
             const chip = document.createElement('button');
