@@ -58,33 +58,34 @@ class CourseOpeningController extends Controller
     public function store(Request $request)
     {
         $data = $request->validate([
-            'course_id'            => 'required|exists:courses,id',
-            'branch_id'            => 'nullable|exists:branches,id',
-            'code'                 => 'nullable|string|max:30',
-            'name'                 => 'nullable|string|max:200',
-            'start_date'           => 'required|date',
-            'end_date'             => 'nullable|date|after_or_equal:start_date',
-            'days_of_week'         => 'nullable|array',
-            'days_of_week.*'       => 'integer|between:1,7',
-            'session_time_start'   => 'nullable|array',
-            'session_time_start.*' => 'nullable|date_format:H:i',
-            'session_time_end'     => 'nullable|array',
-            'session_time_end.*'   => 'nullable|date_format:H:i',
-            'total_sessions'       => 'required|integer|min:1',
-            'max_students'         => 'nullable|integer|min:1',
-            'price'                => 'nullable|numeric|min:0',
-            'price_promo'          => 'nullable|numeric|min:0',
-            'promo_until'          => 'nullable|date',
-            'promo_label'          => 'nullable|string|max:80',
-            'status'               => 'required|in:borrador,publicado,en_curso,finalizado,cancelado',
-            'notes'                => 'nullable|string',
-            'instructor_ids'       => 'nullable|array',
-            'instructor_ids.*'     => 'exists:employees,id',
-            'client_ids'           => 'nullable|array',
-            'client_ids.*'         => 'exists:clients,id',
+            'course_id'              => 'required|exists:courses,id',
+            'branch_id'              => 'nullable|exists:branches,id',
+            'code'                   => 'nullable|string|max:30',
+            'name'                   => 'nullable|string|max:200',
+            'start_date'             => 'required|date',
+            'end_date'               => 'nullable|date|after_or_equal:start_date',
+            'days_of_week'           => 'nullable|array',
+            'days_of_week.*'         => 'integer|between:1,7',
+            'session_time_start'     => 'nullable|array',
+            'session_time_start.*'   => 'nullable|date_format:H:i',
+            'session_time_end'       => 'nullable|array',
+            'session_time_end.*'     => 'nullable|date_format:H:i',
+            'total_sessions'         => 'required|integer|min:1',
+            'max_students'           => 'nullable|integer|min:1',
+            'price'                  => 'nullable|numeric|min:0',
+            'price_promo'            => 'nullable|numeric|min:0',
+            'promo_until'            => 'nullable|date',
+            'promo_label'            => 'nullable|string|max:80',
+            'status'                 => 'required|in:borrador,publicado,en_curso,finalizado,cancelado',
+            'notes'                  => 'nullable|string',
+            'instructor_ids'         => 'nullable|array',
+            'instructor_ids.*'       => 'exists:employees,id',
+            'client_ids'             => 'nullable|array',
+            'client_ids.*'           => 'exists:clients,id',
+            // El precio pagado y estado son solo para referencia en la inscripción,
+            // NO generan pagos automáticos — eso se hace desde Gestión de Pagos
             'student_price_paid'     => 'nullable|numeric|min:0',
             'student_payment_status' => 'nullable|in:pendiente,pagado,parcial,becado',
-            'generate_sessions'    => 'nullable|boolean',
         ]);
 
         DB::beginTransaction();
@@ -102,23 +103,23 @@ class CourseOpeningController extends Controller
 
             $opening = CourseOpening::create([
                 'course_id'      => $data['course_id'],
-                'branch_id'      => $data['branch_id']   ?? null,
-                'code'           => $data['code']        ?? null,
-                'name'           => $data['name']        ?? null,
+                'branch_id'      => $data['branch_id']    ?? null,
+                'code'           => $data['code']         ?? null,
+                'name'           => $data['name']         ?? null,
                 'start_date'     => $data['start_date'],
-                'end_date'       => $data['end_date']    ?? null,
-                'time_start'     => $firstTime['start']  ?? null,
-                'time_end'       => $firstTime['end']    ?? null,
+                'end_date'       => $data['end_date']     ?? null,
+                'time_start'     => $firstTime['start']   ?? null,
+                'time_end'       => $firstTime['end']     ?? null,
                 'days_of_week'   => !empty($data['days_of_week']) ? $data['days_of_week'] : null,
                 'session_times'  => !empty($sessionTimes) ? $sessionTimes : null,
                 'total_sessions' => $data['total_sessions'],
                 'max_students'   => $data['max_students'] ?? null,
-                'price'          => $data['price']       ?? null,
-                'price_promo'    => $data['price_promo'] ?? null,
-                'promo_until'    => $data['promo_until'] ?? null,
-                'promo_label'    => $data['promo_label'] ?? null,
+                'price'          => $data['price']        ?? null,
+                'price_promo'    => $data['price_promo']  ?? null,
+                'promo_until'    => $data['promo_until']  ?? null,
+                'promo_label'    => $data['promo_label']  ?? null,
                 'status'         => $data['status'],
-                'notes'          => $data['notes']       ?? null,
+                'notes'          => $data['notes']        ?? null,
                 'enrolled_count' => 0,
             ]);
 
@@ -127,10 +128,12 @@ class CourseOpeningController extends Controller
                 $opening->instructors()->sync($data['instructor_ids']);
             }
 
-            // Estudiantes — solo clientes externos
+            // Inscribir clientes como estudiantes
+            // NOTA: El precio pagado/estado aquí es solo referencia en la inscripción.
+            // El cronograma de pagos real se gestiona desde "Gestión de Pagos > Generar cuotas".
             $enrolledAt = now()->toDateString();
-            $pricePaid  = $data['student_price_paid']     ?? $opening->price;
-            $payStatus  = $data['student_payment_status'] ?? 'pendiente';
+            $pricePaid  = isset($data['student_price_paid'])     ? $data['student_price_paid']     : null;
+            $payStatus  = isset($data['student_payment_status'])  ? $data['student_payment_status'] : 'pendiente';
 
             foreach ($request->input('client_ids', []) as $clientId) {
                 CourseOpeningStudent::create([
@@ -146,10 +149,10 @@ class CourseOpeningController extends Controller
 
             $opening->syncEnrolledCount();
 
-            // Generar sesiones automáticas
-            if ($request->boolean('generate_sessions')) {
-                $this->generateSessions($opening, $sessionTimes);
-            }
+            // Siempre generar sesiones — total_sessions es el tope máximo
+            // Refrescar para que days_of_week cast (array) esté aplicado
+            $opening->refresh();
+            $this->generateSessions($opening, $sessionTimes);
 
             DB::commit();
 
@@ -160,7 +163,7 @@ class CourseOpeningController extends Controller
 
         return redirect()
             ->route('course-openings.show', $opening->id)
-            ->with('success', 'Apertura creada correctamente.');
+            ->with('success', 'Apertura creada. Para registrar pagos ve a "Gestionar pagos" y genera el cronograma.');
     }
 
     public function show(CourseOpening $courseOpening)
@@ -170,13 +173,14 @@ class CourseOpeningController extends Controller
             'instructors',
             'enrollments.employee',
             'enrollments.client',
+            'enrollments.payments',
             'sessions.attendances',
         ]);
 
-        $totalStudents  = $courseOpening->enrollments->count();
-        $attendanceRate = null;
-
+        $totalStudents    = $courseOpening->enrollments->count();
+        $attendanceRate   = null;
         $realizedSessions = $courseOpening->sessions->where('status', 'realizada');
+
         if ($realizedSessions->count() > 0) {
             $totalPresent  = 0;
             $totalPossible = 0;
@@ -301,13 +305,15 @@ class CourseOpeningController extends Controller
 
     private function generateSessions(CourseOpening $opening, array $sessionTimes = []): void
     {
+        // Requiere fecha inicio, fin y al menos un día seleccionado
         if (!$opening->start_date || !$opening->end_date || empty($opening->days_of_week)) return;
 
         $current = $opening->start_date->copy();
         $end     = $opening->end_date->copy();
         $num     = 1;
+        $max     = $opening->total_sessions; // tope máximo ingresado por el usuario
 
-        while ($current->lte($end) && $num <= $opening->total_sessions) {
+        while ($current->lte($end) && $num <= $max) {
             $isoDay = $current->isoWeekday();
             if (in_array($isoDay, $opening->days_of_week)) {
                 $dayTimes = $sessionTimes[$isoDay] ?? null;
@@ -322,6 +328,13 @@ class CourseOpeningController extends Controller
                 $num++;
             }
             $current->addDay();
+        }
+
+        // Actualizar total_sessions con el número real de sesiones creadas
+        $realCount = $num - 1;
+        if ($realCount !== $opening->total_sessions) {
+            $opening->total_sessions = $realCount;
+            $opening->saveQuietly();
         }
     }
 }
