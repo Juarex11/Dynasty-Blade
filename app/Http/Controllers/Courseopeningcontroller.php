@@ -135,17 +135,39 @@ class CourseOpeningController extends Controller
             $pricePaid  = isset($data['student_price_paid'])     ? $data['student_price_paid']     : null;
             $payStatus  = isset($data['student_payment_status'])  ? $data['student_payment_status'] : 'pendiente';
 
-            foreach ($request->input('client_ids', []) as $clientId) {
-                CourseOpeningStudent::create([
-                    'course_opening_id' => $opening->id,
-                    'client_id'         => (int) $clientId,
-                    'employee_id'       => null,
-                    'price_paid'        => $pricePaid,
-                    'payment_status'    => $payStatus,
-                    'enrolled_at'       => $enrolledAt,
-                    'status'            => 'inscrito',
-                ]);
-            }
+           foreach ($request->input('client_ids', []) as $clientId) {
+    $enrollment = CourseOpeningStudent::create([
+        'course_opening_id' => $opening->id,
+        'client_id'         => (int) $clientId,
+        'employee_id'       => null,
+        'price_paid'        => $pricePaid,
+        'payment_status'    => $payStatus,
+        'enrolled_at'       => $enrolledAt,
+        'status'            => 'inscrito',
+    ]);
+
+    // Si se registró un pago inicial al inscribir, crear el registro
+    // en el cronograma de pagos para que quede reflejado correctamente.
+    if ($pricePaid > 0) {
+        $coursePrice = $opening->effective_price ?? $opening->course->price ?? $pricePaid;
+        $amountDue   = $coursePrice;
+        $status      = $pricePaid >= $amountDue ? 'pagado' : 'parcial';
+
+        \App\Models\CourseStudentPayment::create([
+            'course_opening_student_id' => $enrollment->id,
+            'course_opening_id'         => $opening->id,
+            'payment_type'              => 'unico',
+            'installment_number'        => null,
+            'concept'                   => 'Pago inicial (inscripción)',
+            'amount_due'                => $amountDue,
+            'amount_paid'               => $pricePaid,
+            'status'                    => $status,
+            'due_date'                  => $opening->start_date,
+            'paid_at'                   => now()->toDateString(),
+            'recorded_by'               => auth()->id(),
+        ]);
+    }
+}
 
             $opening->syncEnrolledCount();
 
